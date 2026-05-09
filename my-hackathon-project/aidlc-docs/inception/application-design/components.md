@@ -19,10 +19,10 @@
 
 | ID | コンポーネント名 | 配置 | 主要 FR | 主要ストーリー |
 |---|---|---|---|---|
-| **C-01** | Mobile Client | **iOS のみ (撤退ルートは Section 11 / Section 1.5 N-05 参照)** | FR-01, FR-02, FR-11, **FR-12**, **FR-13**, **FR-14 (Mobile 側)** | US-1.1, US-1.2, **US-1.6**, US-3.1, **US-3.3 (Mobile 側)**, US-5.1〜5.6, **US-5.7** |
+| **C-01** | Mobile Client | **iOS のみ (撤退ルートは Section 11 参照)** | FR-01, FR-02, FR-11, **FR-12**, **FR-13**, **FR-14 (Mobile 側)** | US-1.1, US-1.2, **US-1.6**, US-3.1, **US-3.3 (Mobile 側)**, US-5.1〜5.6, **US-5.7** |
 | **C-02** | Dialogue API (API Gateway + Lambda) | AWS / ap-northeast-1 | FR-05, FR-06, FR-07 | US-2.1, US-2.2, US-2.4 |
 | **C-03** | Risk Calculator | AWS / Lambda 内ライブラリ (純粋関数) | FR-04 | US-1.5 |
-| **C-04** | History & Title Service | AWS / Lambda + DynamoDB (META#AFFIRMATIONS / S-02 AWS-shift / **achieved フィールド N-07** / **getLastBathTime N-06**) | FR-08, FR-09, FR-10 (動的判定), **FR-14 (達成フラグ記録)** | US-3.1, US-3.2, **US-3.3 (記録側)**, US-4.1, US-4.2 |
+| **C-04** | History & Title Service | AWS / Lambda + DynamoDB (META#AFFIRMATIONS / S-02 AWS-shift / **achieved フィールド FR-14** / **getLastBathTime DD-03**) | FR-08, FR-09, FR-10 (動的判定), **FR-14 (達成フラグ記録)** | US-3.1, US-3.2, **US-3.3 (記録側)**, US-4.1, US-4.2 |
 | **C-05** | External Client | AWS / Lambda 内ライブラリ | FR-03 | US-1.3 |
 | **C-06** | Infrastructure (CDK/CloudFormation) | AWS / IaC | NFR-DAT-03, NFR-DAT-05 | (横断的) |
 | **C-07** | Title Catalog Distribution (S-04 AWS-shift) | AWS / S3 + CloudFront | FR-10 (静的メタ配信) | US-4.2 (称号 name/description) |
@@ -32,9 +32,9 @@
 ## C-01: Mobile Client
 
 ### 配置と前提
-- **プラットフォーム**: **iOS 確定 (Q4=A / N-05)** / 撤退ルートは「iOS のまま擬似データモード (DEBUG ビルド)」(Web 版廃止)
+- **プラットフォーム**: **iOS 確定 (Q4=A)** / 撤退ルートは「iOS のまま擬似データモード (DEBUG ビルド)」(Web 版廃止 / Section 11 参照)
 - **言語**: **Swift / SwiftUI 確定**
-- **オフライン要件**: 機微データ (ヘルスケア生データ / **カレンダー生情報 N-04**) は **端末ローカルにのみ保持** / NFR-DAT-02 / R3
+- **オフライン要件**: 機微データ (ヘルスケア生データ / **カレンダー生情報 FR-12**) は **端末ローカルにのみ保持** / NFR-DAT-02 / R3
 
 ### 責務 (What)
 
@@ -52,11 +52,11 @@
    - 取得時のみ使用、永続保存しない (NFR-DAT-02)
    - 失敗時のフォールバック
 
-3.5. **カレンダーデータ取得** — US-1.6 (FR-12) / **N-04**
+3.5. **カレンダーデータ取得** — US-1.6 (FR-12) / **FR-12**
    - iOS EventKit から翌日の予定サマリを取得 (`CalendarSummary { isHoliday, earliestEventTime, eventCount, asOf }`)
    - 機微情報 (タイトル / 場所 / 参加者) は **端末ローカル限定** / AWS には集計値のみ送信
    - 失敗時のフォールバック: 全フィールド null で対話生成継続
-   - **CalendarDataAdapter** で抽象化 → DEBUG ビルドで PseudoCalendarAdapter に差し替え可能 (N-05)
+   - **CalendarDataAdapter** で抽象化 → DEBUG ビルドで PseudoCalendarAdapter に差し替え可能 (Section 11 参照)
 
 4. **Dialogue API 呼び出し** — US-2.1 (FR-05, FR-06)
    - ヘルスケア要約 (生データではなく統計値) + 環境データ + 端末 UUID を `POST /dialogue` に送信
@@ -85,11 +85,11 @@
    - 選択送信レスポンスに含まれる `affirmation: { judgeMessage, devilMessage }` を画面に表示
    - DDB 由来 (META#AFFIRMATIONS パーティション) のテンプレートを Lambda がランダム選択した結果を表示するだけ / 固定文言を Mobile に持たない
 
-8.6. **30 分後の達成確認通知スケジュール** — US-3.3 (FR-14) / **N-07**
+8.6. **30 分後の達成確認通知スケジュール** — US-3.3 (FR-14) / **FR-14**
    - `choice='bath'` の選択完了レスポンスに含まれる `achievementCheckScheduledAt` を受け、**iOS UNUserNotificationCenter** にローカル通知をスケジュール
    - 30 分後に通知発火 → ユーザーが Yes/まだを選択 → `submitAchievement(selectionId, achieved)` で C-04 に記録
    - 通知許可フローを **オンボーディングに追加**
-   - **NotificationScheduler** で抽象化 → DEBUG ビルドで LoggingNotificationScheduler に差し替え可能 (N-05)
+   - **NotificationScheduler** で抽象化 → DEBUG ビルドで LoggingNotificationScheduler に差し替え可能 (Section 11 参照)
    - `choice='skip'` の場合はスケジュールしない (US-3.3 AC5)
 
 9. **設定画面** — US-5.3
@@ -99,20 +99,20 @@
 10. **ダラけ感のある UI 演出** — US-5.6 (FR-11 / NFR-USA-03)
     - キャラがソファに沈む / ぬるっと動く / ゆるいフォント等のうち最低 3 つ
 
-11. **翌日予定のホーム画面ミニ表示** — US-5.7 (FR-13) / **N-04**
+11. **翌日予定のホーム画面ミニ表示** — US-5.7 (FR-13) / **FR-12**
     - ホーム画面の片隅に翌日予定サマリ (最早開始時刻 / イベント数) を表示
     - タップで **iOS 標準カレンダーアプリに遷移** (アプリ内に詳細画面を持たない)
     - `getTomorrowMiniSummary()` で取得 (US-1.6 と同じ EventKit を再利用 / キャッシュ戦略は Functional Design / O-14)
     - カレンダー権限拒否時は表示しない (画面ノイズ回避)
 
-### 抽象化点 (N-05 で再定義 / iOS 確定 / DEBUG ビルド擬似データモード)
+### 抽象化点 (iOS 確定 / DEBUG ビルド擬似データモード / Section 11 Q4 Implementation Plan 参照)
 
 | インターフェース | Production 実装 (iOS Release) | DEBUG ビルド擬似データ | テスト用 (Mock) |
 |---|---|---|---|
 | `HealthDataAdapter` | HealthKitAdapter (HealthKit から 6 項目取得) | PseudoHealthAdapter (固定 JSON または UI で擬似値入力) | MockHealthAdapter |
 | `LocationDataAdapter` | CoreLocationAdapter | PseudoLocationAdapter (固定値) | MockLocationAdapter |
-| `CalendarDataAdapter` (**N-04**) | EventKitAdapter (EventKit から翌日予定サマリ集計) | PseudoCalendarAdapter (固定 JSON) | MockCalendarAdapter |
-| `NotificationScheduler` (**N-07**) | LocalNotificationScheduler (UNUserNotificationCenter) | LoggingNotificationScheduler (発火せずログ出力のみ) | MockNotificationScheduler |
+| `CalendarDataAdapter` (**FR-12**) | EventKitAdapter (EventKit から翌日予定サマリ集計) | PseudoCalendarAdapter (固定 JSON) | MockCalendarAdapter |
+| `NotificationScheduler` (**FR-14**) | LocalNotificationScheduler (UNUserNotificationCenter) | LoggingNotificationScheduler (発火せずログ出力のみ) | MockNotificationScheduler |
 | `WeatherDataAdapter` | (Mobile では使わない / Dialogue API 側で取得) | 同上 | — |
 | `DialogueAPIClient` | URLSession で HTTPS | (差し替え不要 / 同じ実装で AWS と通信) | MockDialogueAPIClient |
 | `TitleCatalogClient` | URLSession で CloudFront GET (ETag 対応) | (差し替え不要) | MockTitleCatalogClient |
@@ -220,7 +220,7 @@
    - 直近 N 日の選択分布を返す
    - C-02 が動的トーンシフトのプロンプト入力に使う
 
-5.5. **最終 'bath' タイムスタンプ提供** (内部 API / C-02 から呼ばれる) — **N-06 / FR-04**
+5.5. **最終 'bath' タイムスタンプ提供** (内部 API / C-02 から呼ばれる) — **DD-03 / FR-04**
    - `getLastBathTime(deviceUUID)` で最新の `choice='bath'` 選択時刻を返す
    - C-02 が現在時刻との差分から `hoursSinceLastBath` を計算
    - 履歴に 'bath' なしの場合は null
@@ -230,7 +230,7 @@
    - 取得結果からランダム 1 件選択
    - 文言は事前審査済みテンプレート (NFR-CON-03 品位 / R13 と同種の運用ガードレール)
 
-7. **達成フラグ記録エンドポイント** — `POST /selections/{selectionId}/achievement` (FR-14 / **N-07**) / US-3.3
+7. **達成フラグ記録エンドポイント** — `POST /selections/{selectionId}/achievement` (FR-14 / **FR-14**) / US-3.3
    - 入力: `selectionId` / `achieved: bool`
    - DynamoDB UpdateItem: 該当 SelectionRecord の `achieved` を更新
    - 元の `choice='bath'` は維持 (上書きしない / US-3.3 AC4)
@@ -357,9 +357,9 @@
 | FR-10 | 称号・バッジ (動的判定) | C-04 |
 | FR-10 | 称号・バッジ (静的メタ配信) | C-07 (S-04 AWS-shift) |
 | FR-11 | ダラけ感のある UI 演出 | C-01 |
-| **FR-12** | **カレンダー連携 (EventKit)** | **C-01 (CalendarDataAdapter / N-04)** + C-02 (User Prompt 取り込み) |
-| **FR-13** | **翌日予定のホーム画面ミニ表示** | **C-01 (`getTomorrowMiniSummary()` + iOS 標準カレンダー遷移 / N-04)** |
-| **FR-14** | **入浴決意の達成確認通知** | **C-01 (NotificationScheduler / N-07)** + **C-04 (markAchievement / S-06 / N-07)** |
+| **FR-12** | **カレンダー連携 (EventKit)** | **C-01 (CalendarDataAdapter / FR-12)** + C-02 (User Prompt 取り込み) |
+| **FR-13** | **翌日予定のホーム画面ミニ表示** | **C-01 (`getTomorrowMiniSummary()` + iOS 標準カレンダー遷移 / FR-12)** |
+| **FR-14** | **入浴決意の達成確認通知** | **C-01 (NotificationScheduler / FR-14)** + **C-04 (markAchievement / S-06 / FR-14)** |
 
 すべての FR がいずれかのコンポーネントに割り当てられていることを確認。
 
@@ -371,18 +371,18 @@
 | US-1.3 | C-01 + C-05 |
 | US-1.4 (S) | C-01 |
 | US-1.5 | C-03 (純粋関数) + C-02 (呼び出し) |
-| US-1.6 (M / Revision 2 / N-04) | C-01 (CalendarDataAdapter) + C-02 (User Prompt 取り込み) |
+| US-1.6 (M / Revision 2 / FR-12) | C-01 (CalendarDataAdapter) + C-02 (User Prompt 取り込み) |
 | US-2.1, US-2.2 | C-02 + C-01 (表示) |
 | US-2.3 (S) | C-01 (UI) + C-02 (プロンプトに反映) — Should ストーリー / 拡張点として担保 |
 | US-2.4 | C-02 (プロンプト) + C-04 (履歴サマリ提供) — Must / 動的トーンシフトの中核 |
 | US-3.1 | C-01 + C-04 (S-02 AWS-shift で affirmation を C-04 経由 DDB から取得) |
 | US-3.2 | C-01 + C-04 |
-| US-3.3 (S / Revision 2 / N-07) | C-01 (NotificationScheduler) + C-04 (markAchievement / S-06) |
+| US-3.3 (S / Revision 2 / FR-14) | C-01 (NotificationScheduler) + C-04 (markAchievement / S-06) |
 | US-4.1, US-4.2 | C-04 (動的判定) + C-07 (静的メタ配信 / S-04 AWS-shift) + C-01 (結合表示) |
 | US-5.1, US-5.2, US-5.3 | C-01 |
 | US-5.5 | C-01 (オンボーディング画面) — R11 対策方針 (a)(c): コンセプト明示 + 予選通過後 Bolt で法務観点レビュー |
 | US-5.6 | C-01 |
-| US-5.7 (S / Revision 2 / N-04) | C-01 (`getTomorrowMiniSummary()` + iOS 標準カレンダーへの遷移) |
+| US-5.7 (S / Revision 2 / FR-12) | C-01 (`getTomorrowMiniSummary()` + iOS 標準カレンダーへの遷移) |
 
 すべての 21 ストーリーが 1 つ以上のコンポーネントに割り当てられていることを確認。
 

@@ -37,7 +37,7 @@ type EnvironmentData = {
   asOf: ISODateTime;
 };
 
-// CalendarSummary: N-04 で追加 (FR-12 / US-1.6)
+// CalendarSummary: FR-12 で追加 (FR-12 / US-1.6)
 // 機微情報 (タイトル / 場所 / 参加者) は端末ローカル限定 / AWS には集計値のみ送信
 type CalendarSummary = {
   isHoliday: boolean | null;          // 翌日が休日かどうか (null = 取得不可 / 権限拒否)
@@ -111,7 +111,7 @@ type SelectionRecord = {
 
 ## C-01: Mobile Client
 
-### Adapter インターフェース (N-05 で再定義 / iOS 確定 / DEBUG ビルド擬似データモード)
+### Adapter インターフェース (iOS 確定 / DEBUG ビルド擬似データモード / Section 11 Q4 Implementation Plan 参照)
 
 ```typescript
 interface HealthDataAdapter {
@@ -126,7 +126,7 @@ interface LocationDataAdapter {
   fetchCurrentLocation(): Promise<{ latitude: number; longitude: number } | null>;
 }
 
-// CalendarDataAdapter: N-04 で追加 (FR-12 / US-1.6)
+// CalendarDataAdapter: FR-12 で追加 (FR-12 / US-1.6)
 // iOS EventKit から翌日の予定サマリを取得
 interface CalendarDataAdapter {
   isAvailable(): Promise<boolean>;
@@ -138,7 +138,7 @@ interface CalendarDataAdapter {
   // - 終日イベントが「休日」相当の場合 isHoliday=true
 }
 
-// NotificationScheduler: N-07 で追加 (FR-14 / US-3.3)
+// NotificationScheduler: FR-14 で追加 (FR-14 / US-3.3)
 // iOS UNUserNotificationCenter でローカル通知をスケジュール
 interface NotificationScheduler {
   isAvailable(): Promise<boolean>;
@@ -153,7 +153,7 @@ interface NotificationScheduler {
   cancel(selectionId: string): Promise<void>;
 }
 
-// 実装パターン (N-05 / iOS 確定):
+// 実装パターン (iOS 確定 / Section 11 Q4 Implementation Plan 参照):
 // - Production (Release): HealthKitAdapter / CoreLocationAdapter / EventKitAdapter / LocalNotificationScheduler
 // - DEBUG ビルド (擬似データモード): PseudoHealthAdapter / PseudoLocationAdapter / PseudoCalendarAdapter / LoggingNotificationScheduler
 // - Test: Mock 注入 (Adapter インターフェースに対する Stub/Mock)
@@ -165,11 +165,11 @@ interface NotificationScheduler {
 // US-5.1, US-5.5
 function showOnboarding(): Promise<{ accepted: boolean }>;
 
-// US-1.1, US-1.2, US-1.3, US-1.6 (Mobile 側のデータ取得 / N-04 でカレンダー追加)
+// US-1.1, US-1.2, US-1.3, US-1.6 (Mobile 側のデータ取得 / FR-12 でカレンダー追加)
 function collectInputs(): Promise<{
   health: HealthSummary | null;
   location: { latitude: number; longitude: number } | null;
-  calendar: CalendarSummary | null;       // N-04: FR-12 / US-1.6
+  calendar: CalendarSummary | null;       // FR-12: FR-12 / US-1.6
 }>;
 
 // US-2.1 (Dialogue API 呼び出し)
@@ -177,15 +177,15 @@ function requestDialogue(input: {
   deviceUUID: DeviceUUID;
   health: HealthSummary | null;
   location: { latitude: number; longitude: number } | null;
-  calendar: CalendarSummary | null;       // N-04: FR-12 / US-1.6
+  calendar: CalendarSummary | null;       // FR-12: FR-12 / US-1.6
   characterSetId?: string;  // US-2.3 Should: キャラ切替の拡張点
 }): Promise<Dialogue>;
 
-// US-5.7 (翌日予定ホーム画面ミニ表示 / N-04 / FR-13)
+// US-5.7 (翌日予定ホーム画面ミニ表示 / FR-12 / FR-13)
 // US-1.6 と同じ EventKit 経由の取得を再利用 (キャッシュ戦略は Functional Design / O-14)
 function getTomorrowMiniSummary(): Promise<CalendarSummary | null>;
 
-// US-3.1 (選択送信) — AWS-shift: affirmation を DDB 由来でレスポンスに含める / N-07: 達成確認スケジュール
+// US-3.1 (選択送信) — AWS-shift: affirmation を DDB 由来でレスポンスに含める / FR-14: 達成確認スケジュール
 function submitSelection(input: {
   deviceUUID: DeviceUUID;
   choice: Choice;
@@ -193,19 +193,19 @@ function submitSelection(input: {
   environment: EnvironmentData | null;
   riskLevel: RiskLevel | null;
 }): Promise<{
-  selectionId: string;                       // N-07: 達成確認エンドポイント呼び出し用
+  selectionId: string;                       // FR-14: 達成確認エンドポイント呼び出し用
   newTitles: AwardedTitle[];                 // id + awardedAt のみ (静的メタは catalog から)
   affirmation: AffirmationMessage;           // S-02 AWS-shift: DDB 由来の両キャラ全肯定メッセージ
-  achievementCheckScheduledAt: ISODateTime | null;  // N-07: choice='bath' 時のみ非 null (現在時刻 + 30 分)
+  achievementCheckScheduledAt: ISODateTime | null;  // FR-14: choice='bath' 時のみ非 null (現在時刻 + 30 分)
 }>;
 
-// US-3.3 (達成確認応答 / N-07 / FR-14)
+// US-3.3 (達成確認応答 / FR-14 / FR-14)
 function submitAchievement(input: {
   selectionId: string;
   achieved: boolean;
 }): Promise<{ recordedAt: ISODateTime }>;
 
-// 通知スケジュール (N-07 / FR-14): submitSelection レスポンス受領後に Mobile 側で実行
+// 通知スケジュール (FR-14 / FR-14): submitSelection レスポンス受領後に Mobile 側で実行
 // - choice='bath' の場合のみ NotificationScheduler.scheduleAchievementCheck() を呼ぶ
 // - 通知発火後にユーザーが Yes/まだ を選択すると submitAchievement() を呼ぶ
 
@@ -241,7 +241,7 @@ type DialogueRequest = {
   deviceUUID: DeviceUUID;
   health: HealthSummary | null;
   location: { latitude: number; longitude: number } | null;
-  calendar: CalendarSummary | null;       // N-04: FR-12 / US-1.6
+  calendar: CalendarSummary | null;       // FR-12: FR-12 / US-1.6
   characterSetId?: string;  // 省略時は 'standard'
 };
 
@@ -262,8 +262,8 @@ function buildPrompt(input: {
   environment: EnvironmentData | null;
   riskFlag: AnnoyanceRiskFlag;
   recentSkipPattern: { skipDays: number; consecutiveSkipDays: number };
-  calendarSummary: CalendarSummary | null;   // N-04: FR-12 / 翌日予定の文脈付与
-  hoursSinceLastBath: number | null;         // N-06: C-04 getLastBathTime() の結果
+  calendarSummary: CalendarSummary | null;   // FR-12: FR-12 / 翌日予定の文脈付与
+  hoursSinceLastBath: number | null;         // DD-03: C-04 getLastBathTime() の結果
   characterSetId: string;
   systemPromptVersion: string;
 }): { systemPrompt: string; userPrompt: string };
@@ -281,7 +281,7 @@ function buildPrompt(input: {
 // → C-03: 迷惑リスク計算 (calculateAnnoyanceRisk / hoursSinceLastBath は C-04 から取得した値を渡す)
 // → C-05: 天気データ取得
 // → C-04: 連続サボり長期化サマリ取得 (US-2.4 / FR-07 / getRecentSkipPattern)
-// → C-04: 最終 'bath' タイムスタンプ取得 (N-06 / getLastBathTime / 並列で呼び出し)
+// → C-04: 最終 'bath' タイムスタンプ取得 (DD-03 / getLastBathTime / 並列で呼び出し)
 // → Bedrock: Claude 呼び出し
 ```
 
@@ -295,7 +295,7 @@ function buildPrompt(input: {
 // US-1.5 / FR-04
 // PBT-02, 03, 07, 08, 09 適用範囲
 function calculateAnnoyanceRisk(input: {
-  hoursSinceLastBath: number | null;   // N-06: C-04 getLastBathTime() 経由で C-02 が取得して渡す
+  hoursSinceLastBath: number | null;   // DD-03: C-04 getLastBathTime() 経由で C-02 が取得して渡す
   health: HealthSummary | null;
   environment: EnvironmentData | null;
 }): AnnoyanceRiskFlag;
@@ -326,14 +326,14 @@ type SelectionRequest = {
 };
 
 type SelectionResponse = {
-  selectionId: string;                       // N-07: 達成確認エンドポイント呼び出し用
+  selectionId: string;                       // FR-14: 達成確認エンドポイント呼び出し用
   recordedAt: ISODateTime;
   newTitles: AwardedTitle[];                 // id + awardedAt のみ (静的メタは catalog から)
   affirmation: AffirmationMessage;           // S-02 AWS-shift: DDB 由来の両キャラ全肯定メッセージ
-  achievementCheckScheduledAt: ISODateTime | null;  // N-07: choice='bath' のみ非 null (recordedAt + 30min)
+  achievementCheckScheduledAt: ISODateTime | null;  // FR-14: choice='bath' のみ非 null (recordedAt + 30min)
 };
 
-// N-07 / FR-14 / US-3.3
+// FR-14 / FR-14 / US-3.3
 // POST /selections/{selectionId}/achievement
 type AchievementRequest = {
   selectionId: string;            // path parameter
@@ -405,7 +405,7 @@ function getRecentSkipPattern(input: {
   consecutiveSkipDays: number;
 };
 
-// N-06 / FR-04: 最終 'bath' タイムスタンプ取得 (C-02 から呼ばれる / hoursSinceLastBath 計算用)
+// DD-03 / FR-04: 最終 'bath' タイムスタンプ取得 (C-02 から呼ばれる / hoursSinceLastBath 計算用)
 function getLastBathTime(input: {
   deviceUUID: DeviceUUID;
 }): Promise<ISODateTime | null>;
@@ -416,7 +416,7 @@ function getLastBathTime(input: {
 // - C-02 が現在時刻との差分を計算して hoursSinceLastBath を求める
 ```
 
-### 内部メソッド (達成フラグ更新 / N-07 / FR-14 / US-3.3)
+### 内部メソッド (達成フラグ更新 / FR-14 / FR-14 / US-3.3)
 
 ```typescript
 // 通知から「Yes (入った)」「まだ (入ってない)」を選択した結果を SelectionRecord に記録
@@ -430,7 +430,7 @@ function markAchievement(input: {
 // - 同一 selectionId に対する複数回呼び出しは最後の値で上書き (Last-write-wins / Functional Design で確定)
 ```
 
-### DynamoDB スキーマ拡張 (N-07 / FR-14 反映)
+### DynamoDB スキーマ拡張 (FR-14 / FR-14 反映)
 
 既存の SelectionRecord に `achieved` フィールドを追加:
 
@@ -445,7 +445,7 @@ Item attributes:
   health: HealthSummary | null
   environment: EnvironmentData | null
   riskLevel: RiskLevel | null
-  achieved: boolean | null   ← N-07 で追加 (null=未確認 / true=達成 / false=未達)
+  achieved: boolean | null   ← FR-14 で追加 (null=未確認 / true=達成 / false=未達)
                               ← choice='bath' のみで意味を持つ
                               ← choice='skip' の場合は常に null
 ```

@@ -17,13 +17,13 @@ aidlc-state.md のタイムスタンプ更新で厳守する。
 5. **state.md 更新時刻**: aidlc-state.md の各ステージ完了時刻も同じルールで記録する。
 
 ## Project Information
-- **Project Name**: 風呂キャンサポーター (仮)
+- **Project Name**: 風呂キャンサポーター
 - **Context**: AWS Summit Japan 2026 ハッカソン参加 / テーマ「人をダメにするサービス」
 - **Submission Deadline (書類審査)**: 2026-05-10
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-07 (※ 起動時刻の正確な記録なし、日付のみ)
-- **Current Stage**: INCEPTION - Units Generation (進行中 / 重点ステージ / Generation + Phase E + F 完了 / Approve & Continue 待機)
-- **Last State Update**: 2026-05-09T04:24:49Z
+- **Current Stage**: INCEPTION - Units Generation (進行中 / 重点ステージ / Generation + Phase E + F + G + 最終仕上げ + 15 ファイル限定 S レベル達成 完了 / Y-1 (時点マーカー追加) + Y-2 (specialized 4 ファイル N-XX タグ縮約) 修正完了 / Approve & Continue 待機)
+- **Last State Update**: 2026-05-09T20:53:23Z
 
 ## Workspace State
 - **Existing Code**: No
@@ -68,7 +68,7 @@ aidlc-state.md のタイムスタンプ更新で厳守する。
 - [x] User Stories — 2026-05-07T14:43:10Z 完了承認 (user-stories.md / personas.md / user-stories-assessment.md 作成完了 / サマリ修正 18 件/M:16/S:2 / v1→v2 差分計算明記 / 持ち越し 3 判断 (US-2.4/US-5.5/US-2.3) を Workflow Planning へ引き継ぎ)
 - [x] Workflow Planning — 2026-05-07T14:56:29Z 完了承認 (execution-plan.md 作成完了 / 全 8 セクション + 役割分担表 / Mermaid + Text Alternative 二重表現 / 持ち越し 3 判断 D-01/D-02/D-03 暫定方針記載 / Unit 6 件暫定分解 / Construction 概略 / PRFAQ を ADDITIONAL DELIVERABLE として正式組み込み)
 - [x] Application Design — 2026-05-09T03:30:00Z 完了承認 (Generation + Revision 1 + 2 + 3 (Phase A + B + C + D) 完了 / Round 1.5 全完了 / 最終確定値: 7 コンポーネント (C-01〜C-07) / 21 ストーリー (M:17, S:4 / v3) / AWS マネージドサービス 6 (Bedrock + Lambda + DynamoDB + API Gateway + S3 + CloudFront) / PBT 対象 3 純粋関数 (FR-04 / FR-05 / FR-10) / Section 1 欠番ポインタ + Section 1.5 Naming Decision (N-01) + Section 1.6 Design Decisions (DD-01〜DD-03) + Section 2〜18 / 機微データ境界 NFR-DAT-02 / R3 / SECURITY-13 維持 / Compliance ブロッキング所見なし)
-- [~] Units Generation — 進行中 / Approve & Continue 待機 2026-05-09T04:24:49Z (Generation + **Phase E (集計表整合性修正)** + **Phase F (責務スコープ整合性修正)** 完了 / 4 ファイル作成 = assessment + unit-of-work + unit-of-work-dependency + unit-of-work-story-map / Step 1 + Step 12-15 実施 / Step 2-11 はユーザー優先事項 6 件で代替 / 7 コンポーネント → 7 Unit (1:1) 確定 / 主担当総和 21 = Unit-1: 12 + Unit-2: 4 + Unit-3: 1 + Unit-4: 4 + Unit-5/6/7: 0 (副担当のみ/横断) ✓ / PBT 対象 3 関数の Unit 帰属 (FR-04→Unit-3 / FR-05→Unit-2 / FR-10→Unit-4) / Open Items O-01〜15 担当 Unit 一覧化 (O-08 Closed / 残り 14 件 / 一覧表は unit-of-work.md のみに集約) / ファイル間責務分担確定 (unit-of-work.md = Unit 定義中核 / unit-of-work-dependency.md = Unit 間関係性 / unit-of-work-story-map.md = ストーリー観点) / Bolt 1 デプロイ順序確定 / 整合性原則維持 (7 Unit / 17 Must / 21 ストーリー / AWS 6 / PBT 3 / 機微データ境界 NFR-DAT-02/R3/SECURITY-13) / Compliance ブロッキング所見なし)
+- [~] Units Generation — 進行中 / Approve & Continue 待機 2026-05-09T20:33:46Z (Generation + Phase E + F (初回 + 追加 X-3/X-6) + G 完了 / 4 ファイル作成 = assessment + unit-of-work + unit-of-work-dependency + unit-of-work-story-map / Step 1 + Step 12-15 実施 / Step 2-11 はユーザー優先事項 6 件で代替 / 7 コンポーネント → 7 Unit (1:1) 確定 / 主担当総和 21 ✓ / PBT 対象 3 関数の Unit 帰属確定 / Open Items O-01〜15 担当 Unit 一覧 (一覧表は unit-of-work.md のみに集約 / application-design.md Section 16 はポインタ化 / X-3 解消) / user-stories.md「次のステップ」章に時点マーカー追加 (X-6 解消) / ファイル間責務分担確定 / Bolt 1 デプロイ順序確定 / Phase G: 「(仮)」3 箇所削除 + v 系履歴サマリ化 / 整合性原則維持 (7 Unit / 17 Must / 21 ストーリー / AWS 6 / PBT 3 / 機微データ境界 NFR-DAT-02/R3/SECURITY-13) / Round 1.5 全完了 / Compliance ブロッキング所見なし)
 
 ### CONSTRUCTION
 - [ ] Per-Unit Loop (各 Unit ごと)

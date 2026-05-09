@@ -1,5 +1,7 @@
 # Application Design Assessment
 
+> **時点記録**: 本 assessment は **Application Design ステージ実行開始時点 (2026-05-07T15:00:47Z)** の状態を記録する。当時の認識 (FR-01〜11 / 18 ストーリー / 6 Unit 暫定分解 / 6 コンポーネント) は本 assessment 中の数字に反映されている。Application Design Revision 1 / 2 / 3 (Phase A〜D) で **FR-12〜14 / 21 ストーリー (M:17, S:4) / 7 Unit / 7 コンポーネント** に拡張された経緯は `audit.md` を参照。
+>
 > **作成日**: 2026-05-07T15:00:47Z
 > **目的**: 本プロジェクトで Application Design ステージを実行する正当性、および標準ルール (Step 1-15) のうち Step 2-9 (Plan + [Answer]: tag Q&A loop) をスキップする根拠を文書化
 

@@ -710,6 +710,354 @@ audit.md: Application Design ステージ完了承認エントリ追加 + Round 
 
 ---
 
+## Units Generation — Phase F + G 統合実施 開始 (最終仕上げ)
+**Timestamp**: 2026-05-09T20:13:13Z
+**User Input**: "チームメンバーレビューと責務スコープ精査の結果、Units Generation ステージで Phase F (責務スコープ整合性修正) と Phase G (チームコメント反映) の 2 つの軽微な修正が必要と判明しました。両方とも設計内容への影響なし / 機械的修正のため、**1 ラウンドで統合実施**してください。
+
+[Phase F の内容: Open Items 担当一覧のポインタ化 / 全体整合性確認のスコープ縮約]
+[Phase G の内容: 指摘 1 = 「(仮)」削除 全ファイル網羅 / 指摘 2 = user-stories.md v 系履歴サマリ化]
+
+【統合実施の進行順序】
+1. Phase G 指摘 1 (「(仮)」削除 / 全ファイル網羅)
+2. Phase F 作業 1 (story-map.md Open Items 担当一覧をポインタ化)
+3. Phase F 作業 2 (story-map.md 全体整合性確認のスコープ縮約)
+4. Phase G 指摘 2 (user-stories.md v 系履歴サマリ化)
+5. 最終 grep 検証 (Phase F + G 両方の確認)
+6. audit.md / aidlc-state.md に統合エントリ追加"
+
+**AI Response**: "Phase F + G 統合実施を開始。**Phase F は前ターン (2026-05-09T04:24:49Z) で完了済み** のため再確認のみ。Phase G が新規実施対象。実施順序: (1) Phase G 指摘 1: aidlc-state.md / README.md の「(仮)」3 箇所削除 → (2) Phase F 完了状態 grep 再確認 (Open Items 担当表 = unit-of-work.md のみ存在 / story-map.md = ポインタのみ) → (3) Phase G 指摘 2: user-stories.md 冒頭の v 系履歴 4 セクション (line 22-76) を 1 サマリ表に集約 (重要情報 = 再割当注意 / 元資料不改変は保持 / 後半「v1→v2/v2→v3 増減」は維持) → (4) 最終 grep 検証 → (5) audit.md / aidlc-state.md 統合エントリ追加。"
+**Context**: Units Generation Phase E (集計表整合性) + Phase F (責務スコープ整合性) 完了 → Phase F + G 統合実施 (Phase F は再確認のみ + Phase G を新規実施)
+
+---
+
+## Inception 全体 — 責務スコープ網羅調査タスク 開始 (Diagnostic / 修正なし)
+**Timestamp**: 2026-05-09T20:20:28Z
+**User Input**: "Units Generation ステージの Generation + Phase E 完了後、ファイル間の責務スコープ観点で再精査をお願いします。Claude (チャット側) で 4 ファイルをレビューした結果、2 件の責務越境を発見しました (F-1: Open Items 完全重複 / F-2: story-map.md スコープ侵食)。しかし他にも多数のファイルがあるため、本タスクとして網羅的な責務スコープ調査を依頼します。
+
+【調査対象】Inception フェーズ全成果物 16 ファイル (references/ + intent.md + audit.md は対象外)
+【調査観点】(1) 各ファイルの主管責務 / (2) 越境検出 (重複/侵食/役割分担表/ステージ責務違反/履歴混在) / (3) ファイル配置 / (4) 責務分担マップ作成 / (5) 既知 F-1 F-2 確認 + 追加発見
+【厳守事項】調査のみ / 修正なし / 結果は越境一覧 + 修正方針 + 優先度
+【完了報告】責務分担マップ / 越境一覧 / 網羅性検証 / AI-DLC 原則違反検出 / 優先度マトリックス / audit.md aidlc-state.md 調査ログ追加"
+
+**AI Response**: "調査タスク開始。**重要な事前認識**: ユーザー指示の F-1 (Open Items 完全重複) と F-2 (story-map.md 全体整合性スコープ侵食) は **既に Phase F (前ターン 2026-05-09T04:24:49Z) で修正完了済み**。本調査では (a) F-1/F-2 の修正完了状態を再確認 + (b) 他の越境を網羅 grep で追加検出 + (c) 16 ファイルの責務分担マップ作成 + (d) AI-DLC 原則違反 (Round 1.5 Phase A〜D) の網羅検証 を実施。**修正は実施しない / 報告のみ**。"
+**Context**: Units Generation Phase F + G 統合実施完了 → 責務スコープ網羅調査タスク (Diagnostic / Approve & Continue 引き続き保留)
+
+---
+
+## Inception — Phase F 追加修正 開始 (X-3 + X-6 統合解消)
+**Timestamp**: 2026-05-09T20:30:46Z
+**User Input**: "責務スコープ網羅調査タスクの結果を確認しました。F-1 / F-2 は前ターン Phase F で修正完了済み、新規発見 4 件 (X-3〜X-6) のうち X-3 (中) と X-6 (中: 私の判定は Claude Code の「低」より一段上げ) を修正推奨と判断します。X-4 / X-5 は許容範囲のため修正不要。Phase F 追加修正として 2 件を統合実施してください。
+
+【作業 1: X-3 解消】application-design.md Section 16 を unit-of-work.md へのポインタに縮約 (Open Items の Single Source of Truth = unit-of-work.md / application-design.md は概要 + ポインタ)
+【作業 2: X-6 解消】user-stories.md 「次のステップ」章に時点マーカー追加 (User Stories ステージ完了時点 / Application Design Revision 2 で v3 拡張した経緯への参照付き)
+
+【厳守事項】設計内容には変更なし / X-4 (components.md) と X-5 (assessment) は許容範囲のため修正不要 / references/ + intent.md + audit.md 不改変"
+**AI Response**: "Phase F 追加修正開始。実施順序: (1) application-design.md Section 16 表を概要箇条書きに置換 + unit-of-work.md 末尾へのポインタ追加 / Section 16.1 (Closed 項目) は維持 → (2) user-stories.md 「次のステップ」章に時点マーカー追加 (requirements.md Phase D と同じスタイル) → (3) 最終 grep 検証 (Open Items 表 = unit-of-work.md にのみ / 時点マーカー追加確認) → (4) audit.md / aidlc-state.md 更新。設計内容に変更なし。"
+**Context**: 責務スコープ網羅調査タスク完了 → Phase F 追加修正 (X-3 + X-6) 実施
+
+---
+
+## Inception — 最終仕上げラウンド 開始 (PRFAQ スコープ外確認後)
+**Timestamp**: 2026-05-09T20:36:52Z
+**User Input**: "ハッカソン主催者からの明示として 5/10 提出対象は Inception フェーズまでで、PRFAQ は提出対象外と確認しました。これにより PRFAQ ステージは不要 (もしくは本選通過後の作業) となり、残時間を Inception 16 ファイルの最終仕上げに集中します。
+
+【作業 1】Phase F 追加修正 (X-3 + X-6 解消) — Section 16 縮約 + user-stories.md 時点マーカー
+【作業 2】Phase G チームコメント反映 (もし未実施なら) — 「(仮)」削除 + v 系履歴サマリ化
+【作業 3】Inception 16 ファイル全体最終整合性チェック — 観点 (1) 数値 (2) 識別子 (3) ステージ責務 (4) 用語 (5) AI-DLC 原則 (6) 書類審査品質
+
+【厳守事項】references/ + intent.md + audit.md 不改変 / 設計内容変更なし / PRFAQ 作成しない (スコープ外)"
+
+**AI Response**: "Inception 最終仕上げラウンド開始。**重要な事前認識**: 作業 1 (Phase F 追加修正 X-3 + X-6) は **前ターン (2026-05-09T20:33:46Z) で完了済み** / 作業 2 (Phase G「(仮)」削除 + v 系履歴サマリ化) も **前ターン (2026-05-09T20:17:43Z) で完了済み**。本ラウンドでは (a) 作業 1/2 完了状態を grep 再確認 + (b) 作業 3 (16 ファイル横断レビュー / 観点 1-6) を新規実施 + (c) audit.md / aidlc-state.md 更新 + 完了報告。PRFAQ は作成しない (スコープ外)。"
+**Context**: 主催者明示で PRFAQ スコープ外確定 → Inception 16 ファイル最終仕上げに集中 / Round 1.5 全完了済みの状態を確定するため横断レビュー実施
+
+---
+
+## Inception — 最終仕上げ (15 ファイル限定 / S レベル目標) 開始
+**Timestamp**: 2026-05-09T20:43:56Z
+**User Input**: "ハッカソン主催者からの追加情報を踏まえ、最終仕上げラウンドのスコープを確定: 提出方式 = GitHub URL / 評価対象 = aidlc-docs/inception/ 配下のみ (15 ファイル) / 評価者 = AI-DLC 専門家。スコープ外: PRFAQ ステージ + aidlc-docs/inception/README.md (専門評価者には不要 / 過剰)。
+
+【作業 1】Phase F 追加修正 (X-3 + X-6 解消)
+【作業 2】Phase G チームコメント反映確認
+【作業 3 ★最重要★】Inception 15 ファイル全体最終整合性チェック (9 観点)
+
+【厳守事項】aidlc-docs/inception/README.md は作らない / references/ + intent.md + audit.md 不改変 / 設計内容変更なし / 専門評価者向けに過剰な親切ガイド不要 / AI-DLC 標準ディレクトリ構造尊重
+
+【目標】AI-DLC 専門評価者から見て **書類審査向け完成度として S レベル**"
+**AI Response**: "Inception 最終仕上げ (15 ファイル限定 / S レベル) 開始。**重要な事前認識**: 作業 1/2 は前ターンで完了済み (X-3 / X-6 / Phase G「(仮)」/ v 系履歴サマリ化)。本ラウンドでは: (a) 作業 1/2 完了状態を grep 再確認 + (b) **作業 3 (9 観点横断レビュー) を新規実施** + (c) **Y-2 (N-XX タグ specialized 4 ファイル残存 57+ 箇所) を本タスクで修正実施** (S レベル目標 / 設計内容ではなく整合性確保) + (d) その他発見の対応。**aidlc-docs/inception/README.md は作らない / 評価対象外のルート README.md は触らない**。"
+**Context**: 主催者明示で評価対象 = aidlc-docs/inception/ 配下のみ確定 → 15 ファイル限定の最終仕上げ / S レベル目標 / Y-2 修正方針確定
+
+---
+
+## Inception — 最終仕上げ (15 ファイル限定 / S レベル目標) 完了
+**Timestamp**: 2026-05-09T20:53:23Z
+
+**作業 1 (X-3 + X-6): ✅ 前ターン完了済み (再確認)**
+- X-3: Open Items 担当表は `unit-of-work.md` (8 行) のみ / `application-design.md` Section 16 はポインタのみ
+- X-6: `user-stories.md` / `requirements.md` 両方に時点マーカーあり
+
+**作業 2 (Phase G): ✅ 前ターン完了済み (再確認)**
+- 「(仮)」inception/ 配下残存ゼロ
+- v 系履歴サマリ化済み
+
+**作業 3 (15 ファイル横断レビュー / 9 観点)**:
+- 観点 (1) AI-DLC ルール準拠度: ✅ assessment 4 ファイルすべてで Step スキップ根拠明示 (Q1〜Q5 / Mob Elaboration / ユーザー優先事項で代替)
+- 観点 (2) ステージ責務分担: ✅ 上流ファイル (requirements / user-stories / personas) に Unit-X / C-XX 混入なし
+- 観点 (3) Pending Decisions 上流統合: ✅ D-XX 残存ゼロ (履歴記述 = Section 1 欠番ポインタ + execution-plan.md Workflow Planning 表のみ) / N-04/05/07 が requirements.md / user-stories.md に統合済み / N-02/03/06 が DD-01〜DD-03 として再編成済み
+- 観点 (4) 数値・識別子整合性: ✅ 7 コンポーネント / 7 Unit / 21 ストーリー / M:17 / S:4 / AWS 6 / PBT 3 すべて一貫 / 旧 16 ストーリー / 6 コンポーネント残存ゼロ / 旧 18 ストーリー残存 6 箇所は Y-1 として時点マーカー追加で解消
+- 観点 (5) Single Source of Truth: ✅ 役割分担表 0 ファイル (Phase A 原則完全維持) / Open Items 表は unit-of-work.md のみ / story-map.md と application-design.md Section 16 はポインタのみ
+- 観点 (6) 明示的制約ベースの根拠記述: ✅ 内輪向け表現 (「ハッカソン審査軸」「AWS フル活用」「ユニーク性 + 技術力」) ゼロ / すべての設計判断が NFR / R / SECURITY / 主催規約のいずれかへの参照を持つ
+- 観点 (7) 履歴記述と最終仕様の分離: ✅ 集計プロセス残骸 (「修正」「再集計」) ゼロ / Q1 補記 + 時点マーカー (requirements.md + user-stories.md) 配置済み / **本タスクで時点マーカーを 3 つの assessment / Workflow Planning ファイル冒頭にも追加** (Y-1 解消)
+- 観点 (8) PBT Partial 適用: ✅ 3 純粋関数 (FR-04→Unit-3 / FR-05→Unit-2 / FR-10→Unit-4) の Unit 帰属が全ファイルで一貫
+- 観点 (9) Security Baseline All blocking: ✅ 機微データ境界 (NFR-DAT-02 / R3 / SECURITY-13) が 8 ファイルで一貫記述
+
+**Y-1 修正実施**: 3 つの assessment / Workflow Planning ファイル冒頭に **時点記録ブロック** を追加
+- `application-design-assessment.md`: 「Application Design ステージ実行開始時点 (2026-05-07T15:00:47Z) の状態 / FR-01〜11 / 18 ストーリー / 6 Unit 暫定分解」
+- `user-stories-assessment.md`: 「User Stories ステージ実行時点 (2026-05-07T14:00:29Z) の状態 / Mob Elaboration v2 / 18 ストーリー / M:16, S:2」
+- `execution-plan.md`: 「Workflow Planning ステージ作成時点 (2026-05-07T14:43:10Z) の計画 / FR-01〜11 / 18 ストーリー / 6 Unit 暫定分解」
+- 各ブロックに「Application Design Revision で 21 件 / M:17, S:4 / 7 Unit / 7 コンポーネント / FR-12〜14 に拡張された経緯は audit.md 参照」と注記
+- これにより assessment 系の旧数字 (18 ストーリー / 6 コンポーネント / FR-01〜11) が **履歴記述として正当に位置付けられた**
+
+**Y-2 修正実施**: specialized 4 ファイルの N-XX タグを縮約 (前ターン application-design.md と同方針)
+- `components.md`: N-04 → FR-12 (一括) / N-06 → DD-03 (一括) / N-07 → FR-14 (一括) / N-05 5 箇所を「Section 11 参照」に手動置換
+- `services.md`: N-04 → FR-12 / N-06 → DD-03 / N-07 → FR-14 (すべて一括 / N-05 該当なし)
+- `component-methods.md`: N-04 → FR-12 (一括) / N-06 → DD-03 (一括) / N-07 → FR-14 (一括) / N-05 2 箇所を「Section 11 Q4 Implementation Plan 参照」に手動置換
+- `component-dependency.md`: N-04 → FR-12 / N-06 → DD-03 / N-07 → FR-14 (すべて一括 / N-05 該当なし)
+- 検証: specialized 4 ファイル N-04/05/06/07 残存 **ゼロ** ✓
+- 履歴記述として残置: `application-design.md` (3 行 / 「旧 N-02」等の改名経緯) + `execution-plan.md` (7 行 / Workflow Planning 履歴)
+
+**最終整合性検証 (15 ファイル)**:
+- 役割分担表: **0 ファイル** ✓
+- 「(仮)」(inception/ 配下): **ゼロ** ✓
+- 「天使」(旧称) 残存: 履歴記述 (N-01 命名経緯記録) のみ ✓
+- 内輪向け表現: **ゼロ** ✓
+- D-XX 本文中残存: **ゼロ** (履歴記述のみ) ✓
+- N-04/05/06/07 specialized 4 ファイル残存: **ゼロ** ✓ (本タスクで Y-2 解消)
+- Open Items 担当表: `unit-of-work.md` のみ ✓
+- 7 コンポーネント / 7 Unit / 21 ストーリー / M:17 / S:4 / AWS 6 / PBT 3 / 機微データ境界: 全ファイル一貫 ✓
+- 集計プロセス残骸 (「修正」「再集計」): **ゼロ** ✓
+- assessment / Workflow Planning ファイル冒頭の時点マーカー: **3 ファイル** に追加 ✓ (Y-1 解消)
+
+**書類審査向け完成度の自己評価 (AI-DLC 専門評価者視点 / S レベル達成)**:
+- 強み:
+  (a) **AI-DLC ルール準拠**: 全 15 ファイルが各ステージのルールに準拠 / Step スキップ根拠が assessment ファイルで明示 / 標準ルールから逸脱した箇所 (Step 2-9 / Step 2-14 / Step 2-11 スキップ) には Mob Elaboration + Q1〜Q5 + ユーザー優先事項という正当化が記述
+  (b) **方法論的選択の正当性**: User Stories / Application Design / Units Generation の 3 ステージで「Step 1 + Generation のみ」という同一方法論を一貫適用 (assessment ファイル間で根拠が連動)
+  (c) **Single Source of Truth**: Open Items 担当一覧 (unit-of-work.md) / Differentiators (requirements.md) / 機微データフロー図 (application-design.md Section 10) が単一の主管ファイルに集約
+  (d) **明示的制約ベースの根拠**: すべての設計判断 (DD-01 / DD-02 / DD-03 / Section 2.2 設計の優先順位 7 項目) が NFR-DAT-02/03 / R1〜R14 / SECURITY-XX / 主催規約に対する参照を持つ
+  (e) **履歴記述と最終仕様の分離**: Q1 回答 (Q&A 履歴 + v3 補記) / 時点マーカー (requirements.md / user-stories.md / 3 assessment ファイル冒頭) が体系的に配置
+  (f) **PBT Partial + Security Baseline All blocking** の Compliance を全ファイルで一貫
+- 残された懸念: なし (S レベル達成 / 書類審査ブロッキング項目ゼロ)
+
+**Compliance**: 設計内容に変更なし (時点マーカー追加 + N-XX タグ縮約のみ) / Round 1.5 全 Phase の原則と完全整合 / ブロッキング所見なし
+**Context**: 15 ファイル最終仕上げ完了 / S レベル達成 / Approve & Continue + Git push に進行可能
+
+---
+
+## Inception — 最終仕上げラウンド 完了 (PRFAQ スコープ外 + 横断レビュー)
+**Timestamp**: 2026-05-09T20:40:58Z
+
+**作業 1 (X-3 + X-6): 前ターン (2026-05-09T20:33:46Z) で完了済み**
+- X-3: ✅ Open Items 担当表は `unit-of-work.md` (line 328-) のみに存在 / `application-design.md` Section 16 はポインタのみ
+- X-6: ✅ `user-stories.md` (line 599) に時点マーカー追加済み (User Stories ステージ完了時点)
+
+**作業 2 (Phase G): 前ターン (2026-05-09T20:17:43Z) で完了済み**
+- 「(仮)」削除: ✅ aidlc-state.md / README.md の 3 箇所削除済み
+- v 系履歴サマリ化: ✅ user-stories.md 冒頭の 4 セクション → 1 サマリ表に集約済み
+
+**作業 3: 16 ファイル全体最終整合性チェック (観点 1〜6)**
+
+**観点 (1) 数値整合性**:
+- ✓ 7 コンポーネント / 7 Unit / 21 ストーリー / M:17 / S:4 / AWS 6 / PBT 3 はすべて一貫
+- ⚠ **発見 Y-1 (中)**: 旧ストーリー数 18 が 6 箇所残存 (`application-design-assessment.md`:38 / `execution-plan.md`:7,169,304 / `user-stories-assessment.md`:18,51) — いずれも各ステージ assessment / Workflow Planning 成果物としての履歴的記録 / 修正は任意 (時点マーカー追加で解消可)
+
+**観点 (2) 識別子整合性**:
+- ✓ D-01/D-02/D-03 は履歴記述 (Section 1 欠番ポインタ / execution-plan.md Workflow Planning 表) 以外残存なし
+- ⚠ **発見 Y-2 (中)**: N-04/N-05/N-06/N-07 識別タグが specialized 4 ファイルで **大量残存** (`components.md` 13 行 / `services.md` 7 行 / `component-methods.md` 18 行 / `component-dependency.md` 19 行 / 計 57+ 箇所) — Round 1.5 Phase C で application-design.md のみ整理済み / specialized 4 ファイルは未整理 / 修正規模が大きく別ラウンドで判断推奨
+
+**観点 (3) ステージ責務遵守**:
+- ✓ 上流ステージファイル (requirements.md / user-stories.md / personas.md) に Unit-X や C-XX の混入なし
+- ✓ 違反なし
+
+**観点 (4) 用語整合性**:
+- ✓ 「ジャッジ」統一済み (「天使」残存はすべて命名変更経緯の旧称併記のみ / N-01 経緯記録)
+- ✓ 「(仮)」残存ゼロ (Phase G 完了)
+
+**観点 (5) AI-DLC 原則 (Round 1.5 Phase A〜D) の継続維持**:
+- ✓ Phase A (役割分担表 / 重複情報): 役割分担表 0 ファイル / 主要重複は X-3 で解消
+- ✓ Phase B (ステージ責務分担): 違反なし
+- ✓ Phase C (内輪向け表現): 違反なし
+- ✓ Phase D (履歴と最終の分離): X-6 で時点マーカー追加済み / Y-1 残存は履歴的記述として正当
+
+**観点 (6) 書類審査向けの「表玄関」品質**:
+- ✓ README.md は 1 分理解の入口として良好な構成 (プロジェクト概要 → ディレクトリ → ファイル役割 → 参照関係 → ステージ成果物 → ポリシー → メソドロジー → クイックリファレンス)
+- ⚠ **発見 Y-3 (中) → 本タスクで修正実施**: README.md の Inception ステージ成果物表で Application Design / Units Generation の状態が古く (「進行中」「予定」) PRFAQ がスコープ外と確定したのに「Inception 完了後」のまま → **本タスクで修正完了** (✅ 完了 + Phase 状態反映 / PRFAQ → スコープ外注記)
+- ✓ application-design.md Section 1.5 / 1.6 は読み手の入りやすさ良好
+- ✓ requirements.md Differentiators 章 (line 217) は主要差別化要因のサマリとして機能
+
+**修正実施 / 未実施の整理**:
+| 発見 | 重要度 | 修正実施 | 理由 |
+|---|---|---|---|
+| **Y-3** README.md 状態 | 中 | ✅ **本タスクで修正完了** | 書類審査の表玄関 / 即修正の影響大 |
+| Y-1 旧 18 ストーリー残存 (assessment 系 6 箇所) | 中 | ❌ 報告のみ | 各ステージ assessment / Workflow Planning 成果物としての履歴的記録 / 時点マーカー追加で解消可 (別ラウンド判断) |
+| Y-2 N-XX タグ specialized 4 ファイル残存 (57+ 箇所) | 中 | ❌ 報告のみ | 修正規模大 / 設計内容に影響なし / 別ラウンド判断推奨 |
+
+**最終整合性検証 (主要キーワード)**:
+- 役割分担表 / 位置付け: **0 ファイル** ✓ (Phase A 原則の維持)
+- 「天使」(旧称) 残存: 履歴記述 (N-01 命名経緯記録) のみ ✓
+- 「(仮)」残存: ゼロ ✓
+- 「ハッカソン審査軸」「書類審査の通過」「AWS フル活用」など内輪向け表現: ゼロ ✓
+- D-XX 残存: 履歴記述 (Section 1 欠番ポインタ + execution-plan.md Workflow Planning 表) のみ ✓
+- Open Items 担当表: `unit-of-work.md` (line 328-) のみ ✓ / `application-design.md` Section 16 + `unit-of-work-story-map.md` はポインタのみ ✓
+
+**書類審査向け完成度の自己評価**:
+- 強み:
+  (a) 全 16 ファイルが AI-DLC メソドロジーに準拠 / 役割分担表ゼロ / 内輪向け表現ゼロ / 機微データ境界明示 / 自己完結型ドキュメント / Single Source of Truth (Open Items) 確立
+  (b) Differentiators 章 + LLM プロンプト構造 + 機微データフロー図で「ユニーク性 + 技術力」を客観的に説明
+  (c) AWS マネージドサービス 6 (Bedrock / Lambda / DynamoDB / API Gateway / S3 / CloudFront) を明示
+  (d) PBT 対象 3 純粋関数の Unit 帰属確定 + Bolt 1 デプロイ順序 (R8/R9 並行実装戦略)
+  (e) Phase A〜D で AI-DLC 原則を体系的に確立 + Phase E〜G + F 追加で整合性を完璧に確保
+- 残された懸念:
+  (a) Y-2 (N-XX タグ specialized 4 ファイル残存) は AI-DLC 原則 (Phase C 縮約方針) の派生だが、設計内容には影響なし / 書類審査ブロッキングなし
+  (b) Y-1 (旧 18 ストーリー残存) は履歴的記録として正当 / 書類審査ブロッキングなし
+
+**Compliance**: 設計内容に変更なし (README.md の状態反映のみ) / Round 1.5 全 Phase 維持 / ブロッキング所見なし
+**Context**: Inception 最終仕上げラウンド完了 / Y-3 修正完了 / Y-1 / Y-2 は報告のみ (修正は別ラウンドで判断) / Inception フェーズ完了承認 + Git push に進行可能
+
+---
+
+## Inception — Phase F 追加修正 完了 (X-3 + X-6 統合解消)
+**Timestamp**: 2026-05-09T20:33:46Z
+
+**作業 1 (X-3): application-design.md Section 16 を unit-of-work.md へのポインタに縮約**
+- Before: 表 (15 行 / O-01〜O-15 + Closed O-08 / C-XX 観点 + Open ステータス) が unit-of-work.md (Unit-N 観点) と類似情報重複
+- After: 概要箇条書き 14 項目 (O-08 を除く) + ポインタ (`unit-of-work.md` 末尾「Open Items 担当一覧」参照) に縮約 / Section 16.1 (Closed 項目 / DD-03 昇格) は維持
+- Single Source of Truth: **`unit-of-work.md` 末尾の Open Items 担当表 (Unit-N 観点)** に集約 (Construction Phase per-Unit Loop で扱われる責務として最適)
+
+**作業 2 (X-6): user-stories.md「次のステップ」章に時点マーカー追加**
+- Before: 時点マーカーなし (現状進捗との関係が曖昧)
+- After: requirements.md Phase D と同じスタイルで時点マーカー追加: `> **時点**: 本「次のステップ」は **User Stories ステージ完了時点 (Mob Elaboration v2 取り込み完了 / 持ち越し 3 判断を Workflow Planning へ引き継ぐタイミング)** の Next Step 記録です。Application Design Revision 2 で v3 拡張 (21 件 / M:17, S:4) が発生した経緯は requirements.md Q1 回答末尾の補記、および本ファイル「ストーリー版数の系譜 (サマリ)」セクションを参照してください。`
+
+**最終 grep 検証結果**:
+- X-3: Open Items 担当表 (`O-01〜O-15`) は **`unit-of-work.md` (line 328-) にのみ存在** ✓ / `application-design.md` Section 16 はポインタのみ ✓ / `unit-of-work-story-map.md` もポインタのみ (前ターン Phase F 完了済み) ✓
+- X-6: user-stories.md (line 599) に時点マーカー追加確認 ✓ / requirements.md (Phase D 追加済み) と同じスタイル ✓
+
+**変更しなかった内容 (意図的)**:
+- 設計内容 (Open Items の項目自体・user-stories.md 「次のステップ」本文) は完全不変
+- X-4 (components.md C-XX 観点ストーリー割当表): **観点の違いとして両方残置** (修正不要 / 許容範囲)
+- X-5 (application-design-assessment.md「設計の優先順位」7 項目フル + ポインタ併記): **自己完結性として正当** (修正不要 / 許容範囲)
+- references/ + intent.md + audit.md 既存エントリ (履歴記録)
+
+**Round 1.5 全工程の最終整合状態**:
+- Phase A (構造の整理 / 役割分担表削除 + README + Section 4): ✅ 完了 / 役割分担表 0 ファイル ✓ (Phase A 原則 = 重複情報を持たない)
+- Phase B (責務の上流移動 / Section 1 削除 + DD-01〜DD-03): ✅ 完了 (Phase B 原則 = ステージ責務分担)
+- Phase C (記述の根拠書き換え / 内輪向け削除 + 明示的制約ベース): ✅ 完了 (Phase C 原則 = 明示的制約ベース)
+- Phase D (最終取りこぼし修正 / D-XX 削除 + 数字 + Q1 補記 + 時点マーカー requirements.md): ✅ 完了 (Phase D 原則 = 履歴と最終仕様の分離)
+- Phase E (集計表整合性): ✅ 完了 (主担当総和 21 確定)
+- Phase F 初回 (責務スコープ整合性 / story-map.md Open Items + 全体整合性): ✅ 完了 (前ターン)
+- Phase F 追加 (X-3 + X-6 / application-design.md Section 16 縮約 + user-stories.md 時点マーカー): ✅ 完了 (本ターン)
+- Phase G (チームコメント反映 / 「(仮)」削除 + v 系履歴サマリ化): ✅ 完了
+
+**Compliance**: 設計内容に変更なし / Round 1.5 全 Phase の原則と完全整合 / ブロッキング所見なし
+**Context**: Phase F 追加修正完了 → Inception フェーズ全成果物が AI-DLC メソドロジー準拠の最終形に到達 → Approve & Continue 待機 (PRFAQ ステージへ)
+
+---
+
+## Inception 全体 — 責務スコープ網羅調査タスク 完了 (Diagnostic 報告)
+**Timestamp**: 2026-05-09T20:25:49Z
+**調査範囲**: Inception 16 ファイル (references/ + intent.md + audit.md は対象外)
+**調査観点**: (1) 主管責務マップ作成 / (2) 重複検出 / (3) 越境検出 / (4) AI-DLC 原則 (Round 1.5 Phase A〜D) 違反検出 / (5) F-1 F-2 確認 + 追加発見
+
+**発見した責務越境 6 件**:
+- **F-1 (Open Items 完全重複 / story-map.md と unit-of-work.md)**: ✅ **既に Phase F 修正完了** (story-map.md はポインタのみ)
+- **F-2 (story-map.md 全体整合性スコープ侵食)**: ✅ **既に Phase F 修正完了** ((ストーリー → Unit マッピング観点) サブタイトル + ポインタ縮約済み)
+- **X-3 (中)**: application-design.md Section 16 (C-XX 観点 / line 746〜) と unit-of-work.md 末尾 (Unit-N 観点 / line 328〜) に Open Items 担当表が **両方存在** / Round 1.5 Phase A 原則的にはポインタ集約推奨 / 但しステージ責務 (Application Design vs Units Generation) の違いとしての解釈余地あり
+- **X-4 (低)**: components.md (line 366 / 21 ストーリー → C-XX 割当表) と unit-of-work-story-map.md (Unit-N 割当表) に類似情報が両方存在 / 観点の違いで部分的に正当化可能
+- **X-5 (低)**: 「設計の優先順位 (7 項目)」が application-design.md Section 2.2 と application-design-assessment.md に重複 / assessment はポインタを併記済み (詳細は application-design.md Section 2.2 を参照) / 但し 7 項目フル記述
+- **X-6 (低)**: user-stories.md「次のステップ」章に時点マーカーがない (現在進捗との関係が曖昧 / requirements.md は Phase D で時点マーカー追加済みだが user-stories.md は未追加)
+
+**網羅性検証 (主要キーワード出現マップ)**:
+- Open Items: 4 ファイル (application-design.md / unit-of-work.md = 主管 + 表 / story-map.md = ポインタのみ ✓ / units-generation-assessment.md = 言及のみ)
+- AWS マネージドサービス 6: 13 ファイル (各観点で言及 / 主管は requirements.md Differentiators)
+- PBT 対象: 13 ファイル (各観点で言及)
+- 機微データ境界: 13 ファイル (主管は application-design.md Section 10 / 各派生で言及)
+- Bolt 1: 9 ファイル (主管は unit-of-work-dependency.md Section 4 / 派生は他に分散)
+- Differentiators: 6 ファイル (主管は requirements.md / 派生は他で参照)
+- Q4 = A: 8 ファイル (主管は requirements.md Q4 + application-design.md Section 11)
+- 17 Must / 21 ストーリー: 9 ファイル (主管は user-stories.md)
+- コンポーネント数 7: 5 ファイル (主管は application-design.md Section 4)
+- 役割分担表 / 位置付け: **0 ファイル** ✓ (Round 1.5 Phase A で全削除済み)
+
+**AI-DLC 原則 (Round 1.5 Phase A〜D) 違反検出**:
+- Phase A 原則 (重複情報を持たない): X-3 / X-4 / X-5 で部分的違反 (ステージ責務の違いで一部正当化可能)
+- Phase B 原則 (ステージ責務分担): 違反なし ✓
+- Phase C 原則 (内輪向け表現削除): 違反なし ✓
+- Phase D 原則 (履歴記述と最終仕様の分離): X-6 (user-stories.md「次のステップ」時点マーカー欠落) で軽微な違反
+
+**優先度マトリックス**:
+- 高 (書類審査向けに必修): なし
+- 中 (品質向上のため推奨): X-3 (Open Items 重複 / Round 1.5 Phase A 原則を厳格適用するなら)
+- 低 (許容範囲): X-4 / X-5 / X-6
+
+**結論**: F-1 / F-2 は Phase F 完了済み。残る 4 件 (X-3〜X-6) はすべて中〜低優先度 / 書類審査ブロッキングなし。Phase F 修正実施は Approve & Continue 後の品質向上ラウンドで判断可能。
+**Context**: 調査完了 / 修正は実施せず / Phase F 実施判断はユーザー次第
+
+---
+
+## Units Generation — Phase F + G 統合実施 完了 (最終仕上げ)
+**Timestamp**: 2026-05-09T20:17:43Z
+
+**Phase F (前ターン完了済み / 再確認のみ)**:
+- 作業 1: story-map.md Open Items 担当一覧 ポインタ化 → ✓ 完了済み (前ターン 2026-05-09T04:24:49Z)
+- 作業 2: story-map.md 全体整合性確認 スコープ縮約 + サブタイトル「(ストーリー → Unit マッピング観点)」追加 → ✓ 完了済み (前ターン)
+- grep 再検証: Open Items 担当表は `unit-of-work.md` (line 328-) **のみ** に存在 ✓ / story-map.md はポインタのみ ✓ / 全体整合性章はサブタイトル付き ✓
+
+**Phase G (新規実施)**:
+
+**指摘 1: 「(仮)」を全ファイルから削除 (3 箇所)**
+| ファイル:行 | Before | After |
+|---|---|---|
+| `aidlc-state.md`:20 | `風呂キャンサポーター (仮)` | `風呂キャンサポーター` |
+| `README.md`:1 | `# 風呂キャンサポーター (仮) — AI-DLC プロジェクト` | `# 風呂キャンサポーター — AI-DLC プロジェクト` |
+| `README.md`:7 | `\| 風呂キャンサポーター (仮) \|` | `\| 風呂キャンサポーター \|` |
+
+**変更しなかったファイル (意図的)**:
+- `references/intent_v4.md` / `references/user_stories_v2.md` (Mob Elaboration 確定版 / 不改変)
+- `aidlc-docs/inception/requirements/intent.md` (元資料コピー / 不改変)
+- `audit.md` 既存エントリ (歴史的記録)
+
+**指摘 2: user-stories.md v 系履歴サマリ化 (line 13-76 → サマリ表に集約)**
+
+Before: 4 つの個別セクション + コードブロック ×2 + v1 構成の復元表 (合計約 60 行 / 重複的記述あり)
+- 「元資料からの修正点 (Q1 回答反映)」表
+- 「v1 → v2 差分計算」コードブロック
+- 「v2 → v3 差分計算」コードブロック + 注記 + 衝突注意
+- 「v1 構成の復元」表 (検証用)
+
+After: 1 つの「ストーリー版数の系譜 (サマリ)」表 + Q1 補足表 + US-3.3 衝突注意 (合計約 16 行)
+- 1 表で v1 / v2 / v3 の件数 + 主な変更を集約
+- 検証式 `v2 = 17 - 3 + 4 = 18 ✓ / v3 = 18 + 3 = 21 (M:17, S:4) ✓` を 1 行で表現
+- Q1 回答との対応 (元資料の誤記修正) を v2 / v3 両方の数字で再記述
+- US-3.3 ID 衝突注意は重要な解釈情報として保持
+- 削除: コードブロック ×2 (情報がサマリ表に含まれる) / v1 構成の復元表 (検証式で代替)
+
+**保持した重要情報**:
+- v1 → v2 → v3 の遷移と各版数
+- 各版での新規/削除/大幅更新の内容
+- 元資料 (`references/user_stories_v2.md`) 不改変ポリシー
+- v3 が AI-DLC ステージ内のみのバージョンであること
+- Application Design Revision 2 で確定された経緯
+- US-3.3 ID 衝突注意 (再割当の解釈)
+- Q1 回答との対応 (元資料の誤記修正)
+
+**最終 grep 検証結果**:
+- 「(仮)」残存: **ゼロ** ✓ (audit.md 履歴 + intent.md 不改変を除く)
+- Open Items 担当表: `unit-of-work.md` (line 328-) **のみ存在** ✓ / `story-map.md` はポインタのみ ✓
+- `story-map.md` 全体整合性のサブタイトル: 「(ストーリー → Unit マッピング観点)」確認 ✓
+
+**Compliance**: 設計内容に変更なし / 表記整合 + サマリ化のみ / Round 1.5 Phase A で確立された AI-DLC 原則と完全整合 / ブロッキング所見なし
+**Context**: Phase F + G 統合実施 完了 → Units Generation Approve & Continue 待機 (集計表整合性 + 責務スコープ整合性 + 「(仮)」削除 + v 系履歴サマリ化 すべて解消)
+
+---
+
 ## Units Generation — Phase F 完了 (責務スコープ整合性修正)
 **Timestamp**: 2026-05-09T04:24:49Z
 

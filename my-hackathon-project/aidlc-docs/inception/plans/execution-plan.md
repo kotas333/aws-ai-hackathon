@@ -1,5 +1,7 @@
 # Execution Plan (Inception / Workflow Planning ステージ成果物)
 
+> **時点記録**: 本 execution-plan は **Workflow Planning ステージ作成時点 (2026-05-07T14:43:10Z)** の計画を記録する。当時の認識 (FR-01〜11 / 18 ストーリー / 6 Unit 暫定分解) は本ファイル中の数字に反映されている。Application Design Revision 1 / 2 で **FR-12〜14 / 21 ストーリー (M:17, S:4) / 7 Unit / 7 コンポーネント** に拡張された経緯は `audit.md` および `application-design.md` Section 1.5 / 1.6 を参照。
+>
 > **作成日**: 2026-05-07T14:43:10Z
 > **状態**: Draft (完了承認待ち)
 > **基底ドキュメント**:

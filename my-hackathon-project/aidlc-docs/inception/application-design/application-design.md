@@ -739,25 +739,24 @@ PRFAQ ステージで上記を「Internal FAQ: 予選通過後の最優先タス
 
 ## Section 16. Open Items (Functional Design へ持ち越し)
 
-本ステージでは確定しないが Functional Design (per-Unit / Construction Phase) で詳細化が必要な項目:
+Application Design ステージ完了時点で、以下の領域は次ステージ以降で詳細化される未解決事項として残されています:
 
-| # | 項目 | 想定担当コンポーネント (Unit 分解は Units Generation で確定) | 状態 |
-|---|---|---|---|
-| O-01 | 迷惑リスク判定の具体閾値 (運動量スコアの計算式 / 気温・湿度との複合条件) | C-03 Risk Calculator | Open |
-| O-02 | 動的トーンシフトの発火条件 (連続サボり日数閾値 / トーンシフト時のプロンプト具体例) | C-02 Dialogue API | Open |
-| O-03 | DynamoDB シングルテーブルの PK/SK 設計 (アクセスパターン分析 / **`achieved` フィールド追加 (FR-14)** / **META#AFFIRMATIONS パーティション (DD-02)**) | C-04 History & Title | Open |
-| O-04 | 称号付与条件の具体ロジック (10+ 種別ごとの判定式) | C-04 History & Title | Open |
-| O-05 | フォールバック対話テンプレ (Bedrock 障害時) の文言と挙動 | C-02 Dialogue API | Open |
-| O-06 | キャラクター切替 UI の MVP での扱い (プレースホルダ vs. 後置) | C-01 Mobile Client | Open |
-| O-07 | History → Dialogue 経由の Direct Invoke vs. DynamoDB 直読みの最終判断 | C-02 + C-04 | Open |
-| ~~O-08~~ | ~~撤退案発動時の擬似データ Web の UX 設計~~ | ~~C-01~~ | **Closed** (Q4=A の iOS 確定により撤退ルートは「iOS DEBUG ビルドの擬似データモード」となり、Web UX 設計は不要) |
-| O-09 | META#AFFIRMATIONS の choice 別テンプレート初期 10〜20 件の文言確定 (NFR-CON-03 品位) | C-04 History & Title (S-02 AWS-shift) | Open |
-| O-10 | `titles-catalog.json` の初期 10+ 件メタ確定 (name / description / category) | C-07 Title Catalog (S-04 AWS-shift) | Open |
-| O-11 | CloudFront invalidation の運用手順ドキュメント化 | C-07 Title Catalog (S-04 AWS-shift) | Open |
-| O-12 | 起動時の TitleCatalogClient タイムアウト・リトライ・ETag 戦略の確定 | C-01 Mobile Client (S-04 AWS-shift) | Open |
-| O-13 | 達成確認通知の文言 (悪魔キャラ寄り) と発火タイミングの詳細 (アプリがフォアグラウンドの場合 / バックグラウンドの場合) | C-01 Mobile Client (FR-14) | Open |
-| O-14 | カレンダー (EventKit) アクセス時のキャッシュ戦略 (US-1.6 と US-5.7 の重複取得回避) | C-01 Mobile Client (FR-12, FR-13) | Open |
-| O-15 | 擬似データモード (DEBUG ビルド) の擬似値分布の設計 (対話品質テストでカバーすべきケース) | C-01 Mobile Client (Section 11) | Open |
+- 迷惑リスク判定の具体閾値 (FR-04 関連)
+- 動的トーンシフト発火条件 + プロンプト具体例 (FR-07 関連)
+- DynamoDB シングルテーブル PK/SK 設計 (`achieved` フィールド (FR-14) + META#AFFIRMATIONS パーティション (DD-02) 含む)
+- 称号付与条件の具体ロジック (FR-10 関連)
+- フォールバック対話テンプレ (Bedrock 障害時)
+- キャラクター切替 UI の MVP 扱い (プレースホルダ vs. 後置)
+- History → Dialogue Direct Invoke vs. DynamoDB 直読みの最終判断
+- META#AFFIRMATIONS choice 別テンプレート初期文言 (NFR-CON-03 品位)
+- `titles-catalog.json` 初期メタ確定 (name / description / category)
+- CloudFront invalidation 運用手順ドキュメント化
+- TitleCatalogClient タイムアウト・リトライ・ETag 戦略
+- 達成確認通知の文言 (悪魔キャラ寄り) + 発火タイミング詳細
+- EventKit アクセス時のキャッシュ戦略 (US-1.6 と US-5.7 の重複取得回避)
+- 擬似データモード (DEBUG ビルド) の擬似値分布設計
+
+> 詳細な担当 Unit 一覧 (O-01〜O-15 の Unit 帰属確定 / O-08 Closed) は Units Generation ステージ成果物 **`unit-of-work.md` 末尾の「Open Items 担当一覧」セクション** を参照してください。Construction Phase の per-Unit Functional Design でクローズしていく対象です。
 
 ### 16.1 本ステージで Closed にした項目 (Section 16 から本文に昇格)
 

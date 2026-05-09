@@ -16,12 +16,12 @@
 
 | ID | サービス名 | エッジ | ユースケース | 担当 |
 |---|---|---|---|---|
-| **S-01** | Dialogue Service | API Gateway: `POST /dialogue` | ジャッジと悪魔の対話生成 (N-04 で CalendarSummary 入力 / N-06 で hoursSinceLastBath 並列取得) | Dialogue Lambda (C-02) |
-| **S-02** | Selection Service | API Gateway: `POST /selections` | 選択記録 + 称号付与判定 + **両キャラ全肯定文言の DDB 取得** (AWS-shift) + **N-07 達成確認スケジュール時刻返却** | History Lambda (C-04) |
+| **S-01** | Dialogue Service | API Gateway: `POST /dialogue` | ジャッジと悪魔の対話生成 (FR-12 で CalendarSummary 入力 / DD-03 で hoursSinceLastBath 並列取得) | Dialogue Lambda (C-02) |
+| **S-02** | Selection Service | API Gateway: `POST /selections` | 選択記録 + 称号付与判定 + **両キャラ全肯定文言の DDB 取得** (AWS-shift) + **FR-14 達成確認スケジュール時刻返却** | History Lambda (C-04) |
 | **S-03** | History Service | API Gateway: `GET /history` | 履歴取得 (カレンダー用) | History Lambda (C-04) |
 | **S-04** | Awarded Titles Service | API Gateway: `GET /titles` | **獲得称号 ID 一覧** (静的メタ name/description は含まない / AWS-shift) | History Lambda (C-04) |
 | **S-05** | Title Catalog Distribution (S-04 AWS-shift) | CloudFront: `GET /titles-catalog.json` | **称号メタ静的配信** (id → name/description) | C-07 (S3 + CloudFront / Lambda 不経由) |
-| **S-06** | Achievement Service (**新規 / N-07 / FR-14**) | API Gateway: `POST /selections/{selectionId}/achievement` | 30 分後通知の **達成 (Yes) / 未達 (まだ) フラグ** を SelectionRecord に記録 | History Lambda (C-04) |
+| **S-06** | Achievement Service (**新規 / FR-14 / FR-14**) | API Gateway: `POST /selections/{selectionId}/achievement` | 30 分後通知の **達成 (Yes) / 未達 (まだ) フラグ** を SelectionRecord に記録 | History Lambda (C-04) |
 
 ---
 
@@ -36,7 +36,7 @@ US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験の�
 [Mobile (C-01)]
    |  POST /dialogue
    |  { deviceUUID, health, location, calendar, characterSetId? }
-   |                          ^^^^^^^^ N-04 (FR-12 / US-1.6)
+   |                          ^^^^^^^^ FR-12 (FR-12 / US-1.6)
    v
 [API Gateway]
    |  認可: 端末 UUID (SECURITY-04 軽量識別)
@@ -49,13 +49,13 @@ US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験の�
    |
    +-- (2) Risk Calculator (C-03) で calculateAnnoyanceRisk()
    |       └ 純粋関数 / PBT 対象 (FR-04)
-   |       └ hoursSinceLastBath は (3-2) で取得した値を渡す (N-06)
+   |       └ hoursSinceLastBath は (3-2) で取得した値を渡す (DD-03)
    |
    +-- (3) History & Title (C-04) の getRecentSkipPattern() を内部呼び出し
    |       └ 連続サボり長期化フラグ用 (US-2.4 / FR-07)
    |       └ 注: ここは S-01 の内部呼び出し (S-02/S-03/S-04 を経由しない)
    |
-   +-- (3-2) History & Title (C-04) の getLastBathTime() も並列で内部呼び出し (N-06)
+   +-- (3-2) History & Title (C-04) の getLastBathTime() も並列で内部呼び出し (DD-03)
    |       └ 最終 'bath' タイムスタンプ取得 → 現在時刻との差分で
    |          hoursSinceLastBath を計算
    |       └ 履歴に 'bath' なしの場合は null
@@ -65,9 +65,9 @@ US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験の�
    +-- (4) buildPrompt() で system + user prompt を構築
    |       └ 純粋関数 / PBT 対象 (FR-05)
    |       └ 動的トーンシフト適用 (US-2.4)
-   |       └ N-04: CalendarSummary を User Prompt の [Calendar Summary]
+   |       └ FR-12: CalendarSummary を User Prompt の [Calendar Summary]
    |          ブロックに含める (タイトル/場所/参加者は含めない)
-   |       └ N-06: hoursSinceLastBath を User Prompt の [Last Bath Time]
+   |       └ DD-03: hoursSinceLastBath を User Prompt の [Last Bath Time]
    |          ブロックに含める
    |
    +-- (5) Bedrock InvokeModel (Claude 3.5 Sonnet) で対話生成
@@ -136,7 +136,7 @@ US-3.1 + US-4.1 + US-4.2 を統合 + **両キャラ全肯定文言を DDB から
    |       └ DDB 障害時は最小限の Lambda バンドル文言にフォールバック
    |
    |
-   +-- (6) **N-07**: choice='bath' の場合のみ achievementCheckScheduledAt を計算
+   +-- (6) **FR-14**: choice='bath' の場合のみ achievementCheckScheduledAt を計算
    |       (recordedAt + 30 分) してレスポンスに含める
    |       (choice='skip' の場合は null)
    v
@@ -146,7 +146,7 @@ US-3.1 + US-4.1 + US-4.2 を統合 + **両キャラ全肯定文言を DDB から
         recordedAt,
         newTitles: [{ id, awardedAt }, ...],   // 静的メタは catalog から
         affirmation: { judgeMessage, devilMessage },
-        achievementCheckScheduledAt: ISODateTime | null  // N-07 / choice='bath' のみ
+        achievementCheckScheduledAt: ISODateTime | null  // FR-14 / choice='bath' のみ
       }
 
 [Mobile (C-01)] (レスポンス受領後)
@@ -301,7 +301,7 @@ US-4.2 称号メタ情報 (name / description / category) の AWS 側集中管�
 
 ---
 
-## S-06: Achievement Service (`POST /selections/{selectionId}/achievement`) — **新規 / N-07 / FR-14 / US-3.3**
+## S-06: Achievement Service (`POST /selections/{selectionId}/achievement`) — **新規 / FR-14 / FR-14 / US-3.3**
 
 ### ユーザーシナリオ
 US-3.3 (S) — 30 分後の通知から達成 (Yes) / 未達 (まだ) を SelectionRecord に記録
@@ -364,4 +364,4 @@ US-3.3 (S) — 30 分後の通知から達成 (Yes) / 未達 (まだ) を Select
 - FR-11 は UI 演出のため API 不要
 - **FR-13 (翌日予定ミニ表示) は Mobile 内部 (`getTomorrowMiniSummary()` + iOS 標準カレンダーへの遷移)** のため API 不要 (US-1.6 の取得結果を再利用)
 - **AWS マネージドサービス利用範囲**: S-05 追加により S3 + CloudFront を新規にスタックへ追加 (Bedrock + Lambda + DynamoDB + API Gateway + S3 + CloudFront / NFR-DAT-03 整合)
-- **N-07 で API Gateway エンドポイントが 1 つ増加** (`POST /selections/{id}/achievement` / S-06)。Lambda は既存の History Lambda (C-04) を拡張するため新規 Lambda 不要
+- **FR-14 で API Gateway エンドポイントが 1 つ増加** (`POST /selections/{id}/achievement` / S-06)。Lambda は既存の History Lambda (C-04) を拡張するため新規 Lambda 不要

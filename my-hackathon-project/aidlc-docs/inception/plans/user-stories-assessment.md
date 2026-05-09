@@ -1,5 +1,7 @@
 # User Stories Assessment
 
+> **時点記録**: 本 assessment は **User Stories ステージ実行時点 (2026-05-07T14:00:29Z)** の状態を記録する。当時の認識 (Mob Elaboration v2 / 18 ストーリー / M:16, S:2) は本 assessment 中の数字に反映されている。Application Design Revision 2 で v3 に拡張 (21 ストーリー / M:17, S:4 / +US-1.6, US-3.3, US-5.7) された経緯は `user-stories.md` 「ストーリー版数の系譜 (サマリ)」セクション + `requirements.md` Q1 補記 + `audit.md` を参照。
+>
 > **作成日**: 2026-05-07T14:00:29Z
 > **目的**: 本プロジェクトで User Stories ステージを実行する正当性を文書化 (rule: user-stories.md Step 1)
 

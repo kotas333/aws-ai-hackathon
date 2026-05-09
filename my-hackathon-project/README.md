@@ -1,10 +1,10 @@
-# 風呂キャンサポーター (仮) — AI-DLC プロジェクト
+# 風呂キャンサポーター — AI-DLC プロジェクト
 
 ## プロジェクト概要
 
 | 観点 | 内容 |
 |---|---|
-| **プロジェクト名** | 風呂キャンサポーター (仮) |
+| **プロジェクト名** | 風呂キャンサポーター |
 | **ハッカソン** | AWS Summit Japan 2026 ハッカソン |
 | **テーマ** | 「人をダメにするサービス」 |
 | **書類審査締切** | 2026-05-10 |
@@ -123,14 +123,14 @@ audit.md       ←(追記)─── ユーザー入力 + AI 応答 (毎回)
 | Requirements Analysis | `inception/requirements/` 配下 3 ファイル | ✅ 完了 |
 | User Stories | `inception/user-stories/` 配下 2 ファイル + `plans/user-stories-assessment.md` | ✅ 完了 |
 | Workflow Planning | `inception/plans/execution-plan.md` | ✅ 完了 |
-| Application Design | `inception/application-design/` 配下 5 ファイル + `plans/application-design-assessment.md` | ⏳ 進行中 (Revision 1 + 2 完了 / Phase A 進行中 / 再レビュー待ち) |
-| Units Generation | (`inception/units-generation/` を予定) | ⏳ 予定 |
+| Application Design | `inception/application-design/` 配下 5 ファイル + `plans/application-design-assessment.md` | ✅ 完了 (2026-05-09T03:30:00Z 承認 / Revision 1 + 2 + 3 (Phase A〜D) 完了) |
+| Units Generation | `inception/application-design/unit-of-work*.md` 3 件 + `plans/units-generation-assessment.md` | ✅ 完了 (Generation + Phase E + F + G + 追加 X-3/X-6 完了) |
 
-### 🟣 Additional Deliverable (AI-DLC 標準外 / ハッカソン向け追加成果物)
+### 🟣 Additional Deliverable (AI-DLC 標準外)
 
 | 成果物 | 状態 |
 |---|---|
-| PRFAQ (`inception/prfaq/prfaq.md` を予定) | ⏳ Inception 完了後 |
+| PRFAQ | スコープ外 (主催者明示により書類審査提出対象は Inception フェーズまで / 本選通過後に検討) |
 
 ### 🟢 Construction フェーズ (予選通過後 / 概略)
 
