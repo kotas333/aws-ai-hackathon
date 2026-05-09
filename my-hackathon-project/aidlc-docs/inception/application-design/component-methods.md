@@ -585,7 +585,7 @@ class FuroskanSupporterStack {
   dialogueLambda: Function;     // C-02 + C-03 + C-05 をバンドル
   historyLambda: Function;      // C-04 (META#AFFIRMATIONS 読み取りも担当 / S-02 AWS-shift)
   table: Table;                 // DynamoDB シングルテーブル / SSE 有効 / META#AFFIRMATIONS パーティションを含む
-  bedrockPolicy: PolicyStatement;  // InvokeModel 権限 (Claude 3.5 Sonnet)
+  bedrockPolicy: PolicyStatement;  // InvokeModel 権限 (Claude Sonnet 4.6 / Opus 4.7 拡張可能)
   weatherApiSecret: Secret;     // Secrets Manager
   logGroup: LogGroup;           // CloudWatch Logs (構造化 / 機微情報除外)
   costAlarm: Alarm;             // R10 料金監視

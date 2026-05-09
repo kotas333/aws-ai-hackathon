@@ -788,6 +788,81 @@ audit.md: Application Design ステージ完了承認エントリ追加 + Round 
 
 ---
 
+## Inception — Phase I 開始 (モデルバージョン最新化 / レガシー Claude 3.5 Sonnet 解消)
+**Timestamp**: 2026-05-09T21:26:21Z
+**User Input**: "「Claude 3.5 Sonnet」の記述が最新版でも複数箇所に残存しています。これは Round 1.5 〜 最終仕上げまでの全レビューサイクルで検出されなかった問題です。
+
+【残存箇所】(ユーザー指摘 5 件 + 私の grep で追加 4 件 = 計 9 件)
+1. services.md S-01 オーケストレーション
+2. component-methods.md Infrastructure CDK Stack
+3. unit-of-work.md Unit-2 種別と配置
+4. application-design.md Section 9.3 プロンプト品質保証
+5. unit-of-work-dependency.md データフロー図
++ 追加: requirements.md:179 / application-design.md:657 / component-dependency.md:153 / components.md:136
+
+【問題】書類審査時点 (2026-05-15) で「Claude 3.5 Sonnet」は約 1.5 年前のレガシーモデル / AWS Bedrock 最新は Claude Sonnet 4.6 (2026-02-17) / Claude Opus 4.7 (2026-04-20) / 東京リージョン available
+
+【方針】第一候補を Claude Sonnet 4.6 に / 高品質オプションとして Claude Opus 4.7 拡張可能 / NFR-USA-02 (応答速度) + R10 (料金) との整合性
+
+【厳守事項】references/ + intent.md + audit.md 不改変 / 設計内容変更なし / モデル名最新化のみ / 全 grep で「Claude 3.5」残存ゼロ確認"
+
+**AI Response**: "Phase I 開始。実施: (1) 9 箇所順次修正 (ユーザー指定 5 + 追加発見 4) → (2) requirements.md R9 関連記述の確認 + 更新 → (3) 全 grep 検証 (Claude 3.5 / 3.5 Sonnet / Sonnet 3.5 残存ゼロ / 履歴 audit.md 除く) → (4) 自己反省 (なぜ Round 1.5 〜 最終仕上げ 9 観点横断レビューで検出できなかったか + grep パターン改善案) → (5) audit.md / aidlc-state.md 更新。修正パターン: 「Claude 3.5 Sonnet」→「Claude Sonnet 4.6」(基本) + 文脈に応じて「(Sonnet 4.5 の直接後継 / Opus 4.6 相当の知能を低コストで実現 / NFR-USA-02 + R10 と整合)」「Opus 4.7 拡張可能」を追記。"
+**Context**: 15 ファイル最終仕上げ完了 → Phase I (モデルバージョン最新化 / レガシーモデル指定リスク解消)
+
+---
+
+## Inception — Phase I 完了 (モデルバージョン最新化)
+**Timestamp**: 2026-05-09T21:30:46Z
+
+**修正実施 (合計 11 箇所 / 7 ファイル)**:
+
+| # | ファイル:行 | Before | After |
+|---|---|---|---|
+| 1 | `services.md`:73 | `Bedrock InvokeModel (Claude 3.5 Sonnet) で対話生成` | `Bedrock InvokeModel (Claude Sonnet 4.6) で対話生成` |
+| 2 | `component-methods.md`:588 | `// InvokeModel 権限 (Claude 3.5 Sonnet)` | `// InvokeModel 権限 (Claude Sonnet 4.6 / Opus 4.7 拡張可能)` |
+| 3 | `unit-of-work.md`:95 | `Bedrock Claude 3.5 Sonnet (R9 申請後)` | `Bedrock **Claude Sonnet 4.6** (第一候補 / Q4 確定 + NFR-USA-02 整合 / R9 申請後) / 高品質オプションとして Claude Opus 4.7 拡張可能` |
+| 4 | `application-design.md`:471 | `Claude 3.5 Sonnet を第一候補。R9 申請完了後にモデル間比較を Bolt で実施` | `**Claude Sonnet 4.6** を第一候補 (Sonnet 4.5 の直接後継 / Opus 4.6 相当の知能を低コストで実現 / NFR-USA-02 + R10 と整合)。**Claude Opus 4.7** を高品質オプションとして拡張可能 (1M token context / より複雑な指示への追従性 / 東京リージョン available)。R9 申請完了後にモデル間比較を Bolt で実施` |
+| 5 | `unit-of-work-dependency.md`:81 | `Bedrock InvokeModel (Claude 3.5 / no PII echoed)` | `Bedrock InvokeModel (Claude Sonnet 4.6 / no PII echoed)` |
+| 6 | `application-design.md`:657 (追加発見) | `Bedrock モデルアクセス (Claude 3.5 Sonnet)` | `Bedrock モデルアクセス (Claude Sonnet 4.6 第一候補 + Claude Opus 4.7 拡張オプション)` |
+| 7 | `component-dependency.md`:151-155 (追加発見) | データフロー図 `\| Claude 3.5 \|` | `\| Claude \| Sonnet 4.6 \|` (2 行に分割) |
+| 8 | `requirements.md`:179 (追加発見 / Technical Context) | `Amazon Bedrock (Claude 3.5 Sonnet 等)` | `Amazon Bedrock (**Claude Sonnet 4.6** 第一候補 / **Claude Opus 4.7** 拡張可能 / ともに ap-northeast-1 available)` |
+| 9 | `components.md`:136 (追加発見) | `Amazon Bedrock / Claude 3.5 Sonnet 等` | `Amazon Bedrock / **Claude Sonnet 4.6** (第一候補) / **Claude Opus 4.7** (高品質オプション / 拡張可能)` |
+| 10 | `requirements.md`:190 (R9 関連) | `Bedrock Claude モデルアクセス申請 (ap-northeast-1)` | `Bedrock Claude モデルアクセス申請 (**Claude Sonnet 4.6 第一候補 + Claude Opus 4.7 拡張可能** / ap-northeast-1)` |
+| 11 | `requirements.md`:208 (R9 対策方針) | `Claude モデルアクセス申請` | `**Claude Sonnet 4.6** + **Claude Opus 4.7** モデルアクセス申請` |
+
+**変更しなかったファイル (履歴記述として保持 / 意図的)**:
+- `audit.md` 既存エントリ (歴史的記録)
+- `aidlc-docs/inception/requirements/intent.md` (元資料コピー / 不改変ルール)
+- `references/intent_v4.md` / `references/user_stories_v2.md` (Mob Elaboration 確定版)
+- `requirements.md` Q5 回答 (line 270-274 / Q&A 履歴 / Q5 回答時点の認識として残置 / Q1 回答 + 補記スタイルと同方針)
+
+**最終 grep 検証結果**:
+- 「Claude 3.5」「3.5 Sonnet」「Sonnet 3.5」残存: **ゼロ** ✓ (audit.md / intent.md 履歴除く)
+- Claude Sonnet 4.6 出現: 11 箇所 (適切に展開)
+- Claude Opus 4.7 出現: 8 箇所 (拡張オプションとして併記)
+
+**自己反省: なぜ Round 1.5 〜 最終仕上げの 9 観点横断レビューで検出できなかったか**:
+
+1. **観点 (4) 数値・識別子整合性** の grep パターンが「FR-XX / NFR-XX / R-XX / SECURITY-XX / DD-XX / N-01 / O-XX / Unit-N / C-NN」など **AI-DLC ステージ内識別子** に集中していた
+2. **モデル名・サービス名・ライブラリ名・バージョン番号** は grep スコープに含まれていなかった
+3. 「最新版か古い版か」の判断は時刻認識 (今日が 2026-05-10) + AWS 公式情報の参照が必要で、grep だけでは検出困難
+4. 観点 (1) AI-DLC ルール準拠 / (5) Single Source of Truth / (6) 明示的制約ベース / (8) PBT / (9) Security Baseline などの抽象的観点でも、**「具体的な技術選定の最新性」は明示的にカバーされていなかった**
+
+**今後の grep パターン改善案 (10 番目の観点として追加すべき)**:
+- **観点 (10) 技術選定の最新性チェック**:
+  - AWS サービス名 / モデル名 / バージョン番号 / フレームワーク名 を網羅 grep
+  - 各候補について「リリース時期」を確認 (今日との差分)
+  - 例: Claude / Bedrock / Lambda / DynamoDB / API Gateway / S3 / CloudFront / EventKit / HealthKit / Swift / SwiftUI / iOS / etc.
+  - レガシーバージョン (リリース 1 年以上前) は要更新判定
+- **観点 (11) 外部世界 (Web / 公式ドキュメント) との整合性チェック**:
+  - 主要選定について最新情報を参照可能な場合は確認
+  - 主催者規約変更 / SDK バージョン変更 / 廃止予定モデル などをトラック
+
+**Compliance**: 設計内容に変更なし (モデル名最新化のみ / NFR / Risk 構造は維持) / Round 1.5 全 Phase の原則と完全整合 / ブロッキング所見なし
+**Context**: Phase I 完了 → 書類審査向け最終形に到達 (S レベル + 技術選定最新化) / Approve & Continue + Git push に進行可能
+
+---
+
 ## Inception — 最終仕上げ (15 ファイル限定 / S レベル目標) 完了
 **Timestamp**: 2026-05-09T20:53:23Z
 

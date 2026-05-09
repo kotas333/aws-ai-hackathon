@@ -78,7 +78,7 @@ Unit-1 → OS API (HealthKit / CoreLocation / EventKit / UNUserNotif / on-device
 |        ↓ Direct Invoke (DD-03 並列)                             |
 |        Unit-4 (getRecentSkipPattern + getLastBathTime)         |
 |        ↓                                                       |
-|        Bedrock InvokeModel (Claude 3.5 / no PII echoed)        |
+|        Bedrock InvokeModel (Claude Sonnet 4.6 / no PII echoed) |
 |                                                                |
 |  Unit-4 History & Title Lambda                                 |
 |    + evaluateNewTitles (PBT / FR-10)                           |

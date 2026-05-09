@@ -92,7 +92,7 @@ mobile-client/                  ← Unit-1 のリポジトリ
 - **種別**: Cloud Service (API Gateway REST + Lambda)
 - **AWS リージョン**: ap-northeast-1
 - **同梱 Module**: Unit-3 (Risk Calculator) / Unit-5 (External Client) を同一 Lambda にバンドル
-- **使用モデル**: Bedrock Claude 3.5 Sonnet (R9 申請後)
+- **使用モデル**: Bedrock **Claude Sonnet 4.6** (第一候補 / Q4 確定 + NFR-USA-02 整合 / R9 申請後) / 高品質オプションとして Claude Opus 4.7 拡張可能
 
 ### 責務 (What)
 - 対話生成エンドポイント `POST /dialogue` (FR-05, 06)

@@ -150,7 +150,8 @@ C-01 -> UNUserNotificationCenter (FR-14 / OS API / on-device)
 |         v                                                            |
 | +---------------+                                                    |
 | | Bedrock       |                                                    |
-| | Claude 3.5    |                                                    |
+| | Claude        |                                                    |
+| | Sonnet 4.6    |                                                    |
 | | InvokeModel   |                                                    |
 | +-------+-------+                                                    |
 |         |                                                            |

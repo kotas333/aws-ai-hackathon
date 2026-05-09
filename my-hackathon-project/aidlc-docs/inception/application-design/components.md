@@ -133,7 +133,7 @@
 ### 配置と前提
 - **AWS サービス**: API Gateway + Lambda
 - **リージョン**: ap-northeast-1 (Tokyo / NFR-DAT-05)
-- **モデル**: Amazon Bedrock / Claude 3.5 Sonnet 等 (予選通過後の Bolt でモデルアクセス申請 / R9)
+- **モデル**: Amazon Bedrock / **Claude Sonnet 4.6** (第一候補) / **Claude Opus 4.7** (高品質オプション / 拡張可能) (予選通過後の Bolt でモデルアクセス申請 / R9)
 
 ### 責務 (What)
 

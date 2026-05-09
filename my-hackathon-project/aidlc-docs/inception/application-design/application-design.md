@@ -468,7 +468,7 @@ P2 が誤って利用した場合に害を与えない設計を以下で担保:
 | **PBT (FR-05)** | `buildPrompt()` の純粋関数性を担保 (冪等 / 機微情報除外 / フォールバック) |
 | **プロンプトテスト** (Bolt 2-3 / R14) | (a) 各 ToneShift 状態で responses を採取 / (b) 「責めない」ガードレールの違反検出 / (c) systemPromptVersion を変えた A/B 比較 |
 | **System Prompt の版管理** | `systemPromptVersion` 文字列をプロンプトに常在させ、CloudWatch Logs と紐付けて応答品質をトラッキング |
-| **言語モデルの選定** | Claude 3.5 Sonnet を第一候補。R9 申請完了後にモデル間比較を Bolt で実施 |
+| **言語モデルの選定** | **Claude Sonnet 4.6** を第一候補 (Sonnet 4.5 の直接後継 / Opus 4.6 相当の知能を低コストで実現 / NFR-USA-02 数秒以内応答 + R10 料金予算と整合)。**Claude Opus 4.7** を高品質オプションとして拡張可能 (1M token context / より複雑な指示への追従性 / 東京リージョン available)。R9 申請完了後にモデル間比較を Bolt で実施 |
 
 ---
 
@@ -654,7 +654,7 @@ Adapter は以下 2 つの責務を持つ:
 | 項目 | 想定環境 | 予選通過後のアクション |
 |---|---|---|
 | AWS アカウント | 予選通過後の最初の Bolt で準備 | Bolt 1 最優先 / R8 |
-| Bedrock モデルアクセス (Claude 3.5 Sonnet) | ap-northeast-1 で予選通過後の Bolt で申請 | Bolt 1 最優先 / R9 |
+| Bedrock モデルアクセス (Claude Sonnet 4.6 第一候補 + Claude Opus 4.7 拡張オプション) | ap-northeast-1 で予選通過後の Bolt で申請 | Bolt 1 最優先 / R9 |
 | リージョン | ap-northeast-1 (Tokyo) 確定 (NFR-DAT-05) | — |
 | IAM 構成 | 最小権限ロール (Dialogue Lambda / History Lambda 別) | Bolt 1 で IaC として実装 |
 | シークレット | 天気 API キーを Secrets Manager で管理 | Bolt 1 で天気 API も申請 |

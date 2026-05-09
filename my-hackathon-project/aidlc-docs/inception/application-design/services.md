@@ -70,7 +70,7 @@ US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験の�
    |       └ DD-03: hoursSinceLastBath を User Prompt の [Last Bath Time]
    |          ブロックに含める
    |
-   +-- (5) Bedrock InvokeModel (Claude 3.5 Sonnet) で対話生成
+   +-- (5) Bedrock InvokeModel (Claude Sonnet 4.6) で対話生成
    |       └ 4〜6 ターン (US-2.2)
    |       └ 悪魔最後 (US-2.1 AC) はプロンプトで担保
    |
