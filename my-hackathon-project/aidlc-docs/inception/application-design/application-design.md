@@ -755,8 +755,9 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 - 達成確認通知の文言 (悪魔キャラ寄り) + 発火タイミング詳細
 - EventKit アクセス時のキャッシュ戦略 (US-1.6 と US-5.7 の重複取得回避)
 - 擬似データモード (DEBUG ビルド) の擬似値分布設計
+- **`movementScore` の METs ベース定量化** (公式出典: 厚労省「身体活動・運動ガイド2023」+ 国立健康・栄養研究所「メッツ(METs)表」/ 詳細式は `requirements.md` NFR 健康配慮ポリシー脚注参照 / 体重 `weightKg` の HealthSummary 取り込み是非も含めて Functional Design で決着)
 
-> 詳細な担当 Unit 一覧 (O-01〜O-15 の Unit 帰属確定 / O-08 Closed) は Units Generation ステージ成果物 **`unit-of-work.md` 末尾の「Open Items 担当一覧」セクション** を参照してください。Construction Phase の per-Unit Functional Design でクローズしていく対象です。
+> 詳細な担当 Unit 一覧 (O-01〜O-16 の Unit 帰属確定 / O-08 Closed) は Units Generation ステージ成果物 **`unit-of-work.md` 末尾の「Open Items 担当一覧」セクション** を参照してください。Construction Phase の per-Unit Functional Design でクローズしていく対象です。
 
 ### 16.1 本ステージで Closed にした項目 (Section 16 から本文に昇格)
 

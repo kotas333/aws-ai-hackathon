@@ -129,6 +129,7 @@ dialogue-lambda/                ← Unit-2 のリポジトリ
 ### 責務 (What)
 - 迷惑リスク判定 (FR-04 / US-1.5): `calculateAnnoyanceRisk(input)`
 - 入力: プロキシ指標 (`hoursSinceLastBath` / `health: HealthSummary` / `environment: EnvironmentData`)
+- 運動量合算 (`movementScore`) は **METs ベースで定量化** (詳細式は `requirements.md` NFR 健康配慮ポリシー脚注 / Functional Design (Open Item O-16) で詳細化)
 - 出力: `AnnoyanceRiskFlag { level: 'low'|'medium'|'high', hoursSinceLastBath, movementScore, ..., hasMissingData }`
 - `hoursSinceLastBath` は Unit-2 が Unit-4 `getLastBathTime()` 経由で取得した値を渡す (DD-03)
 
@@ -340,5 +341,6 @@ title-catalog/                  ← Unit-7 のリポジトリ
 | O-13 | 達成確認通知の文言 + 発火タイミング詳細 | Unit-1 |
 | O-14 | カレンダー (EventKit) アクセス時のキャッシュ戦略 | Unit-1 |
 | O-15 | 擬似データモード (DEBUG ビルド) の擬似値分布設計 | Unit-1 |
+| **O-16** | **`movementScore` の METs ベース定量化** (公式出典: 厚労省「身体活動・運動ガイド2023」+ 国立健康・栄養研究所「メッツ(METs)表」/ 詳細式は requirements.md NFR 健康配慮ポリシー脚注参照 / 体重 `weightKg` の HealthSummary 取り込み是非も含めて決着) | **Unit-3 (主) + Unit-1 (副 / weightKg 取得是非)** |
 
-> O-08 は Closed (Q4=A 確定により Web 撤退案廃止)。残り 14 Open Items はすべていずれかの Unit に割当済み。
+> O-08 は Closed (Q4=A 確定により Web 撤退案廃止)。残り **15 Open Items** (O-01〜O-07 / O-09〜O-16) はすべていずれかの Unit に割当済み。

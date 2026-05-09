@@ -51,7 +51,9 @@ type RiskLevel = 'low' | 'medium' | 'high';
 type AnnoyanceRiskFlag = {
   level: RiskLevel;
   hoursSinceLastBath: number | null;
-  movementScore: number;  // 運動量合算 (純粋関数)
+  movementScore: number;  // 運動量合算 (純粋関数 / METs ベース算出 /
+                          //   詳細式は requirements.md NFR 健康配慮ポリシー脚注 /
+                          //   Functional Design (Open Item O-16) で詳細化)
   tempC: number | null;
   humidityPct: number | null;
   heartRateAvg: number | null;

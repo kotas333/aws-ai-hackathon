@@ -811,6 +811,62 @@ audit.md: Application Design ステージ完了承認エントリ追加 + Round 
 
 ---
 
+## Inception — Phase J 開始 (運動量スコアの公式指標 METs 根拠追加)
+**Timestamp**: 2026-05-09T21:54:28Z
+**User Input**: "ユーザーから新しい情報を受領: 運動量スコア (movementScore) の公式指標として以下 2 点を採用。設計の科学的根拠を強化する材料として価値が高いため Phase J として実施。
+
+(a) 厚労省「健康づくりのための身体活動・運動ガイド2023」: エネルギー消費量(kcal) = 1.05 × METs × 時間 × 体重(kg)
+(b) 国立健康・栄養研究所「改訂版『身体活動のメッツ(METs)表』」: 活動別 METs 値 (デスクワーク / 通勤の歩行 / 階段の上り下り 等)
+
+【方針: 案 B 中程度】設計内容の本質変更なし / 根拠記述のみ強化 / Round 1.5 Phase C 原則 (明示的制約ベース) と整合 / METs 値の具体的閾値・計算ロジックは Functional Design (per-Unit / Construction Phase) で詳細化することを明示
+
+【作業】(1) requirements.md NFR 健康配慮ポリシー脚注 / (2) application-design.md Section 16 Open Items 確認 + 追加 / (3) components.md C-03 補足 / (4) unit-of-work.md Unit-3 補足 / (5) component-methods.md AnnoyanceRiskFlag コメント補足
+
+【厳守事項】設計本質変更なし / HealthSummary に体重 weightKg を追加しない (Functional Design の責務) / METs 具体閾値は本タスクで定めない / 第一候補 METs ベースだが Functional Design で他指標も検討可能"
+**AI Response**: "Phase J 開始。実施: (1) requirements.md NFR 健康配慮ポリシーの「運動量」プロキシ指標に METs ベース脚注追加 (公式出典 2 件 URL 付き) → (2) Section 16 Open Items に新規追加 (O-16: movementScore の METs ベース定量化 / 担当 Unit-3 / Functional Design で詳細化) → (3) components.md C-03 責務に METs ベース根拠補足 → (4) unit-of-work.md Unit-3 入力プロキシ指標に METs ベース補足 → (5) component-methods.md AnnoyanceRiskFlag movementScore コメントに METs 根拠追加 → (6) 全 grep 検証 (運動量 / movementScore / METs / 公式 URL の出現マップ)。HealthSummary 構造 / AnnoyanceRiskFlag 構造 / Unit/コンポーネント分解は完全不変。"
+**Context**: Phase I 完了 → Phase J (METs 公式根拠追加 / 設計本質不変 / 書類審査評価軸補強)
+
+---
+
+## Inception — Phase J 完了 (運動量 METs 根拠追加)
+**Timestamp**: 2026-05-09T21:58:38Z
+
+**修正実施 (5 ファイル + Open Items 1 件追加)**:
+
+| # | ファイル | Before / After |
+|---|---|---|
+| 1 | `requirements.md` 健康配慮ポリシー (line 148) + 脚注定義 (line 152 末尾) | プロキシ指標「運動量 (歩数・運動時間・アクティブエネルギー)」に「**METs ベースで定量化**」を追記 + 脚注 [^mets] で **公式出典 2 件 URL 付き** + 計算式 `1.05 × METs × 時間 × 体重(kg)` + 「体重 weightKg は Inception フェーズでは HealthSummary に含めない / Functional Design で扱う」を明記 |
+| 2 | `application-design.md` Section 16 Open Items | **新規 O-16 追加**: `movementScore` の METs ベース定量化 + 体重取り込み是非を Functional Design で決着 / 末尾の参照テキストを「O-01〜O-15」→「O-01〜O-16」に更新 |
+| 3 | `components.md` C-03 Risk Calculator 責務 (line 174-178) | 「運動量合算スコア」入力に **METs ベース根拠** (公式出典 2 件 + Open Item O-16 への参照) を追記 / 詳細閾値・METs 計算ロジックは Functional Design で詳細化を明記 |
+| 4 | `unit-of-work.md` Unit-3 Risk Calculator 責務 (line 130-134) | 入力プロキシ指標の解説行に「運動量合算 (`movementScore`) は **METs ベースで定量化**」を追記 / Open Items 担当一覧 (line 326-) に **O-16 を新規行追加** (Unit-3 主担当 + Unit-1 副担当 / 体重取得是非) / 末尾の集計を「14 Open Items」→「15 Open Items」に更新 |
+| 5 | `component-methods.md` AnnoyanceRiskFlag movementScore コメント (line 54) | TypeScript コメントに「METs ベース算出 / 詳細式は requirements.md NFR 脚注 / Functional Design (Open Item O-16) で詳細化」を追記 |
+
+**設計本質変更がないことの自己確認**:
+- ✓ HealthSummary 構造不変 (`steps`, `activeEnergyKcal`, `exerciseMinutes`, `heartRateAvg`, `sleepHours`, `standMinutes`, `asOf` のまま / `weightKg` は追加していない)
+- ✓ AnnoyanceRiskFlag 構造不変 (フィールドの追加なし / `movementScore: number` のまま / コメントのみ強化)
+- ✓ Unit / コンポーネント分解不変 (7 Unit / 7 コンポーネント / Unit-3 / C-03 = Risk Calculator のまま)
+- ✓ FR-04 / US-1.5 の AC 不変 (実装方針のみ補強)
+- ✓ 機微データ境界 (NFR-DAT-02 / R3 / SECURITY-13) 不変 (公式出典は機微情報を含まない / `weightKg` は意図的に保留)
+- ✓ AWS マネージドサービス 6 不変 (Bedrock / Lambda / DynamoDB / API Gateway / S3 / CloudFront)
+- ✓ PBT 対象 3 純粋関数 (FR-04 calculateAnnoyanceRisk / FR-05 buildPrompt / FR-10 evaluateNewTitles) 不変
+
+**最終 grep 検証結果**:
+- 「METs」出現: 5 ファイル (application-design.md / component-methods.md / components.md / unit-of-work.md / requirements.md)
+- 「メッツ」出現: 4 ファイル (application-design.md / components.md / unit-of-work.md / requirements.md)
+- 公式 URL: requirements.md (脚注定義) **のみ** ✓ (Single Source of Truth / 他ファイルからは脚注参照)
+- 「movementScore」出現: 5 ファイル (構造不変 / コメント補強のみ)
+- 「運動量」出現: 5 ファイル (一貫した記述)
+
+**Open Items の最新状態 (Inception 完了時点)**:
+- 旧: O-01〜O-15 / O-08 Closed / 残り 14 Open
+- 新: O-01〜O-16 / O-08 Closed / **残り 15 Open** (O-16 新規追加)
+- O-16 担当: **Unit-3 (主) + Unit-1 (副)** (Risk Calculator が METs 計算 / Mobile が体重取得是非を判断)
+
+**Compliance**: 設計本質変更なし (公式出典による根拠追加のみ) / Round 1.5 Phase C 原則 (明示的制約ベース) と完全整合 / ブロッキング所見なし
+**Context**: Phase J 完了 → Inception フェーズ完了承認 + Git push に進行可能 (15 ファイル / S レベル + 技術選定最新化 + 公式根拠強化)
+
+---
+
 ## Inception — Phase I 完了 (モデルバージョン最新化)
 **Timestamp**: 2026-05-09T21:30:46Z
 

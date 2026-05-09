@@ -145,11 +145,16 @@ intent.md「非機能要件 (NFR)」セクションを本ファイル内に直�
 
 **「迷惑」の定義 (プロキシ指標)**:
 - 最終入浴からの経過時間 (72 時間超でニオイリスク高と推定)
-- 運動量 (歩数・運動時間・アクティブエネルギー)
+- 運動量 (歩数・運動時間・アクティブエネルギー) — **METs ベースで定量化** (Functional Design / Construction Phase で詳細化)[^mets]
 - 気温・天気 (夏場・湿度高時は閾値を短く)
 - 心拍数 (発汗量の推定)
 
 **実装方式**: システム側で閾値フラグを計算 → プロンプトに含めて Bedrock に渡す → 最終判断・対話生成は LLM が行う。LLM は「周囲に迷惑が及ぶ複合条件発動時は、悪魔も柔らかく入浴を推奨せよ」というシステムプロンプトを持つ。
+
+[^mets]: **公式指標として以下を採用**。エネルギー消費量(kcal) = 1.05 × METs × 時間 × 体重(kg) の計算式と活動別 METs 値を `movementScore` 算出の根拠とする。第一候補は METs ベース算出 / Functional Design では他指標 (例: 心拍数からの代替推定) も検討可能とする。
+    - 厚生労働省「健康づくりのための身体活動・運動ガイド2023」: <https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/kenkou/undou/index.html>
+    - 国立健康・栄養研究所「改訂版『身体活動のメッツ(METs)表』」: <https://www.nibiohn.go.jp/eiken/programs/2011mets.pdf>
+    - 体重 (`weightKg`) は **本 Inception フェーズでは HealthSummary に含めない** (機微データ境界 NFR-DAT-02 への影響再評価が必要 / Functional Design で扱う)
 
 ---
 

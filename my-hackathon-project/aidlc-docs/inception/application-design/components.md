@@ -173,8 +173,9 @@
 
 1. **迷惑リスク判定** — US-1.5 (FR-04)
    - 入力: プロキシ指標 (最終入浴経過時間 / 運動量合算スコア / 気温・湿度 / 心拍数)
+   - **運動量合算スコア (`movementScore`)** は **METs ベースで定量化** (公式出典: 厚労省「健康づくりのための身体活動・運動ガイド2023」+ 国立健康・栄養研究所「メッツ(METs)表」/ 詳細式は `requirements.md` NFR 健康配慮ポリシー脚注参照 / Open Item O-16)
    - 出力: リスクレベル (`low` / `medium` / `high`) + 各指標の値 + 欠損ありフラグ
-   - **複合条件で計算** (詳細閾値は Construction Phase / Functional Design で詳細化)
+   - **複合条件で計算** (詳細閾値・METs 計算ロジックは Construction Phase / Functional Design で詳細化)
    - **欠損部分は暫定スコア** (US-1.5 AC)
 
 ### 責務外
