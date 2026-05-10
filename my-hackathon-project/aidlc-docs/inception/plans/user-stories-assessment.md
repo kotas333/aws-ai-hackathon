@@ -9,7 +9,7 @@
 
 | 観点 | 内容 |
 |---|---|
-| **Original Request** | AWS Summit Japan 2026 ハッカソン書類審査向け Inception 成果物 (テーマ「人をダメにするサービス」) |
+| **Original Request** | Inception 成果物 (テーマ「人をダメにするサービス」/ Build Constraint: AWS サービスのみ) |
 | **User Impact** | **Direct** — エンドユーザー向けモバイルアプリ全体 |
 | **Complexity Level** | **Complex** — LLM プロンプト設計、ヘルスケア API 連携、迷惑リスク判定、動的トーンシフトの複合 |
 | **Stakeholders** | 開発チーム、外部審査員、AWS、ユーザー (P1)、想定外ユーザー (P2) |
@@ -43,14 +43,14 @@
 **Execute User Stories**: **Yes**
 
 ### Reasoning
-1. ハッカソン書類審査の **審査対象 = Inception 成果物** であり、ユーザーストーリーは主要差別化要因 (`requirements.md` Differentiators) を具体的なシナリオで示す媒体になる
+1. **Inception 成果物が外部ステークホルダーレビュー対象** であり、ユーザーストーリーは主要差別化要因 (`requirements.md` Differentiators) を具体的なシナリオで示す媒体になる
 2. リスク R11/R12/R13 (倫理・誤利用・過激化) はストーリーレベルで言語化しないと設計に落ちない (例: US-5.5 のコンセプト明示は AC レベルで定義しないと審査員に伝わらない)
 3. すでに Mob Elaboration を経た **確定版が存在する** (`references/user_stories_v2.md`) ため、ステージのコストは「インポート + サマリ修正 + 自己完結化」のみで限定的
 4. PBT 拡張 (Partial) の対象 3 純粋関数 (FR-04, FR-05, FR-10) はストーリー単位で識別済みのため、Functional Design への引き継ぎがスムーズ
 
 ## Expected Outcomes
 
-- 書類審査者が `user-stories.md` 単体で全 18 ストーリーの内容 (AC 含む) を把握できる
+- 外部ステークホルダーが `user-stories.md` 単体で全 18 ストーリーの内容 (AC 含む) を把握できる
 - Workflow Planning ステージで Application Design / Units Generation の入力として直接使用できる
 - リスク R11/R12 への設計対応が AC レベルで明示される (US-5.5)
 - PBT 対象 3 関数 (US-1.5, US-2.1 入力組み立て, US-4.1) がストーリー備考に明記され、Functional Design ステージで PBT-01 のプロパティ識別を行う準備ができる

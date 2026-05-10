@@ -11,6 +11,18 @@
 
 ---
 
+> ## TL;DR (3 分で読む)
+>
+> 7 Unit (コンポーネント 1:1 マッピング) の実装単位定義。
+>
+> 1. **Unit 分解**: Unit-1 Mobile (12 ストーリー集中) + Unit-2 Dialogue + Unit-3 Risk Calculator + Unit-4 History & Title + Unit-5 External + Unit-6 Infrastructure + Unit-7 Catalog。
+> 2. **粒度判断**: 7 Unit が「少なすぎず多すぎず」の最適粒度 (3 Unit / 15 Unit との比較で根拠提示)。Module (Unit-3 / Unit-5) を独立 Unit 化する判断は AI-DLC の subdomain 概念と整合。
+> 3. **Open Items**: 17 Open + 1 Closed = 計 18 項目。Functional Design (Bolt 2) でクローズ予定。O-17 (スキャンボタン命名) / O-18 (UX 詳細) は Phase M で追加。
+>
+> 詳細は Bolt 1 デプロイ順序 (`unit-of-work-dependency.md` Section 4) / Open Items 担当一覧 / Unit 粒度比較を参照。
+
+---
+
 ## 命名規則と方針
 
 - Unit ID: `Unit-N` (1 桁)
@@ -208,7 +220,7 @@ history-title-lambda/           ← Unit-4 のリポジトリ
 
 ### 種別と配置
 - **種別**: IaC (横断 / アプリケーションロジックなし)
-- **ツール**: CloudFormation または CDK (主催規約準拠)
+- **ツール**: CloudFormation または CDK
 
 ### 責務 (What)
 - AWS リソース定義 (NFR-DAT-03 / Technical Context):
@@ -225,7 +237,7 @@ history-title-lambda/           ← Unit-4 のリポジトリ
   - Bedrock はモデルアクセスを IAM で制御
 - デプロイパイプライン (Bolt 1 で構築 / 概略): CDK Synth → CloudFormation Deploy
 
-### Bolt 1 最優先タスク (R8 / R9 への対応)
+### Bolt 1 のクリティカルパス (R8 / R9 への対応)
 - AWS アカウント準備 (R8 / 最優先)
 - Bedrock Claude モデルアクセス申請 (R9 / 最優先 / 申請待ち中は他 Unit を並行実装)
 - 詳細は `unit-of-work-dependency.md` Section「Bolt 1 デプロイ順序」参照
@@ -322,7 +334,51 @@ title-catalog/                  ← Unit-7 のリポジトリ
 | DD-02 (META#AFFIRMATIONS) | Unit-4 |
 | DD-03 (hoursSinceLastBath 取得元) | Unit-2 (呼び出し側) + Unit-4 (`getLastBathTime()` 提供側) |
 
-### Open Items 担当一覧 (Application Design Section 16 / O-01〜O-15)
+### Unit 粒度の妥当性 (評価軸 (3) Unit 分解の適切さへの先回り回答)
+
+#### Unit-1 が 12 ストーリー (全 21 の 57%) を抱える理由
+
+外部ステークホルダーから「Unit-1 のストーリー集中は責務過多ではないか」という疑問が想定される。これに対する設計上の根拠:
+
+| # | 根拠 | 詳細 |
+|---|---|---|
+| (a) | **iOS 単一バイナリ制約** | iOS Native アプリは 1 つの実行可能バイナリとしてデプロイされる。複数の Mobile Unit に分解すると、App Store 申請単位 / コードサイニング / 実機配布の単位が崩れる |
+| (b) | **OS API 依存集中** | HealthKit / CoreLocation / EventKit / UNUserNotificationCenter / SwiftUI 等の **iOS OS API は同一プロセス内でしか使えない**。これらを利用する処理は必然的に Mobile Unit に集約される |
+| (c) | **機微データ境界の集中** | NFR-DAT-02 / R3 / SECURITY-13 で **「ヘルスケア生データ + カレンダー生データは端末ローカル限定」** が確定。生データに触れる処理 (集計・整形) は Mobile Unit 内で完結する必要がある (AWS に出してはいけない) |
+| (d) | **Adapter パターンで内部分離** | Unit-1 内部では `HealthDataAdapter` / `LocationDataAdapter` / `CalendarDataAdapter` / `NotificationScheduler` / `DialogueAPIClient` / `TitleCatalogClient` の 6 つの Adapter インターフェースで責務分離 / DEBUG ビルドで擬似データ差し替え可能 / テスタビリティ確保 |
+
+→ **結論**: Unit-1 のストーリー集中は「iOS バイナリ + OS API + 機微データ境界」という **物理的・規制的制約から導かれる必然** であり、責務過多ではない。Adapter パターンによる内部分離で運用上の問題は回避されている。
+
+#### Unit 数 7 が適切な理由 (粒度比較)
+
+外部ステークホルダーから「もっと少ない / もっと多い Unit 分解の方が適切ではないか」という疑問が想定される。代替粒度との比較:
+
+**少なすぎ (例: 3 Unit) のデメリット**:
+- 例: Unit-A (Mobile) / Unit-B (Cloud Backend = Dialogue + History + Risk + External + Catalog) / Unit-C (Infrastructure)
+- ❌ Unit-B が 5 コンポーネント (4 Service + Catalog) を内包 → 責務過多 / per-Unit Loop での Functional Design / Code Generation が肥大化
+- ❌ PBT 対象 3 関数 (FR-04 / FR-05 / FR-10) がすべて Unit-B に集中 → PBT 適用範囲の境界が曖昧
+- ❌ Bolt 1 で R9 (Bedrock) 申請待ち中、Unit-B 全体が Bedrock 依存となり並行実装が困難
+
+**多すぎ (例: 15 Unit) のデメリット**:
+- 例: Mobile UI / Mobile Adapters / Mobile Notification / Dialogue Handler / Risk Module / External Module / History Handler / Title Handler / Affirmation Module / DDB Persistence / S3 Bucket / CloudFront Distribution / IAM / Monitoring / Secrets Manager
+- ❌ per-Unit Loop の繰り返し回数が 15 回 → Construction Phase の管理負荷が過大 / 短期間での実装が困難 (per-Unit Loop の運用範囲を超える)
+- ❌ Unit 間依存マトリックスが 15×15 = 225 セル → 認知負荷が過大
+- ❌ 不要な抽象化 (例: IAM Unit / Monitoring Unit) で外部ステークホルダーの混乱を招く
+
+**採用 (7 Unit = コンポーネント 1:1) の妥当性**:
+
+| 観点 | 7 Unit 採用の利点 |
+|---|---|
+| **per-Unit Loop の運用** | 7 回の繰り返しは **Construction Phase で管理可能** な粒度 |
+| **責務境界の明確化** | 7 Unit すべてに明確な責務 (Mobile UI / Dialogue オーケストレーション / 純粋関数 / 状態永続化 / 外部 API クライアント / IaC / 静的配信) |
+| **PBT 適用範囲** | PBT 対象 3 関数が 3 つの異なる Unit (Unit-3 / Unit-2 / Unit-4) に分散 → 適用境界が明確 |
+| **Bolt 1 並行実装** | R9 申請待ち中に **5 Unit 並行実装可能** (Section 4.1 視覚化図参照) |
+| **追跡可能性** | Application Design ステージの 7 コンポーネント (C-01〜C-07) と 1:1 マッピング / 識別子が一貫 |
+| **外部ステークホルダーへの可読性** | 「7 コンポーネント → 7 Unit」のシンプルな対応 / 不要な抽象化レイヤーなし |
+
+> **結論**: 7 Unit は **少なすぎず多すぎず** の最適な粒度。コンポーネント 1:1 マッピングを採用することで Application Design からの追跡可能性 / per-Unit Loop の運用容易性 / 外部ステークホルダーへの可読性をすべて満たす。
+
+### Open Items 担当一覧 (Application Design Section 16 / O-01〜O-18)
 
 | Open Item | 内容 | 担当 Unit (Functional Design 段階で扱う) |
 |---|---|---|
@@ -342,5 +398,7 @@ title-catalog/                  ← Unit-7 のリポジトリ
 | O-14 | カレンダー (EventKit) アクセス時のキャッシュ戦略 | Unit-1 |
 | O-15 | 擬似データモード (DEBUG ビルド) の擬似値分布設計 | Unit-1 |
 | **O-16** | **`movementScore` の METs ベース定量化** (公式出典: 厚労省「身体活動・運動ガイド2023」+ 国立健康・栄養研究所「メッツ(METs)表」/ 詳細式は requirements.md NFR 健康配慮ポリシー脚注参照 / 体重 `weightKg` の HealthSummary 取り込み是非も含めて決着) | **Unit-3 (主) + Unit-1 (副 / weightKg 取得是非)** |
+| **O-17** | **スキャンボタンの最終命名** (候補: 「綺麗度スキャン」「ジャッジを呼ぶ」「サボり判定」「綺麗度チェック」等 / Phase M で新規追加) | **Unit-1** |
+| **O-18** | **スキャンボタン UX の詳細仕様** (演出時間の最小 3 秒の根拠 + NFR-USA-02 数秒以内との整合 / 演出内容の組み合わせ / 同日キャッシュ戦略 / エラー時の再スキャン UX / Phase M で新規追加) | **Unit-1 (主) + Unit-2 (副 / キャッシュ戦略)** |
 
-> O-08 は Closed (Q4=A 確定により Web 撤退案廃止)。残り **15 Open Items** (O-01〜O-07 / O-09〜O-16) はすべていずれかの Unit に割当済み。
+> O-08 は Closed (Q4=A 確定により Web 撤退案廃止)。残り **17 Open Items** (O-01〜O-07 / O-09〜O-18) はすべていずれかの Unit に割当済み。

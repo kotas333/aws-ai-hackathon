@@ -245,7 +245,7 @@ C-01 -> UNUserNotificationCenter (FR-14 / OS API / on-device)
 
 ## 6. デプロイ単位 (Bolt 1 で R8/R9 着手後の順序)
 
-予選通過後の最初の Bolt で着手する順序:
+Bolt 1 で着手する順序:
 
 1. **C-06 Infrastructure**: AWS アカウント・Bedrock モデルアクセス申請 (R8/R9 / 最優先)
 2. **C-04 History & Title** (DynamoDB 含む / META#AFFIRMATIONS パーティション初期投入を含む) — Bedrock 不要なので独立して着手可能

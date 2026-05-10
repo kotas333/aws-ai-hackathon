@@ -34,7 +34,7 @@ User Stories / Application Design ステージと同じ方法論を継続する�
 |---|---|
 | **Story Grouping** (グルーピング戦略) | Application Design で 7 コンポーネントの担当ストーリーが確定済み (`components.md` 全 21 ストーリーのコンポーネント割当表 / `application-design.md` Section 4)。Unit は **コンポーネントと 1:1 対応** とすることでグルーピング戦略が自明 |
 | **Dependencies** (依存関係) | Application Design で `component-dependency.md` に依存マトリックス + データフロー図 + 通信パターン + 障害伝播 + デプロイ順序を確定済み。Unit 間依存は同じ構造を継承 |
-| **Team Alignment** (チーム構造) | ハッカソン規模 (小規模チーム) のため Unit ごとの責務分担を厳密に分ける必要なし。AI-DLC ステージとしての Functional Design / Code Generation を per-Unit で回せれば十分 |
+| **Team Alignment** (チーム構造) | 本プロジェクトの規模 (小規模チーム) のため Unit ごとの責務分担を厳密に分ける必要なし。AI-DLC ステージとしての Functional Design / Code Generation を per-Unit で回せれば十分 |
 | **Technical Considerations** (スケーラビリティ・デプロイ要件) | Application Design で AWS Serverless 構成と Bolt 1 デプロイ順序 (`component-dependency.md` Section 6) を確定済み。Unit 単位のデプロイ独立性は本ステージで再記述 |
 | **Business Domain** (ドメイン境界) | Application Design Section 8 ドメインモデルで「ジャッジ × 悪魔 × 動的トーンシフト × 称号」の境界を確定済み |
 | **Code Organization** (Greenfield コード組織化) | iOS Swift/SwiftUI (Mobile) + AWS CDK (Infrastructure) という Q4 確定 + Q5 確定で大枠決定済み。Unit ごとのディレクトリ構造は本ステージで補足 |
@@ -46,7 +46,7 @@ User Stories / Application Design ステージと同じ方法論を継続する�
 1. 7 コンポーネント → 7 Unit 確定 (Unit 1〜7 の対応一覧明示)
 2. PBT 対象 3 純粋関数の Unit 帰属 (FR-04→Unit 3 / FR-05→Unit 2 / FR-10→Unit 4)
 3. Open Items O-01〜O-15 の Unit 担当一覧化
-4. 書類審査向けに簡潔 / 軽め / 新規発明なし
+4. Inception 成果物として簡潔 / 軽め / 新規発明なし
 5. 整合性維持 (7 Unit / 17 Must / 21 ストーリー / AWS 6 サービス / PBT 3 / 機微データ境界)
 6. Inception フェーズ完了への道筋 (Units Generation 完了 → PRFAQ ADDITIONAL DELIVERABLE)
 
@@ -80,6 +80,46 @@ User Stories / Application Design ステージと同じ方法論を継続する�
 - **Service**: 独立にデプロイ可能なコンポーネント (本プロジェクトでは Lambda 関数 / S3+CloudFront などの AWS サービス境界に対応)
 - **Module**: Service 内の論理グループ (本プロジェクトでは C-02 内の Risk Calculator (C-03) のように一つの Lambda にバンドルされたライブラリ群が該当)
 - **Unit of Work**: 計画上の単位 (本ステージでは 7 Unit を計画上の単位として扱う)
+
+### Methodology Choice 補足: Module の独立 Unit 化の根拠
+
+AI-DLC 専門評価者が抱きうる疑問「**Module (Unit-3 Risk Calculator / Unit-5 External Client) を独立 Unit として扱うのは適切か / 親 Service (Unit-2 Dialogue API) に統合した方が適切ではないか**」に対する **先回り回答**:
+
+#### (1) 物理境界 vs 論理境界の使い分け
+
+- **物理境界 (デプロイ単位)**: Unit-3 / Unit-5 は Unit-2 にバンドルされる (CDK スタックでは同一 Lambda 関数として配置)
+- **論理境界 (Unit of Work 単位)**: 計画 / 設計 / 検証は **独立 Unit として扱う**
+- 両者は矛盾せず、AI-DLC ルール (Overview / Terminology) の「Service / Module / Unit of Work」3 区分に対応
+
+#### (2) Module を独立 Unit 化する 4 つの根拠
+
+| # | 根拠 | 詳細 |
+|---|---|---|
+| (a) | **PBT 適用範囲の明確化** | Unit-3 (FR-04 calculateAnnoyanceRisk) は純粋関数 / Unit-5 は I/O 含み。Compliance Pre-Check (PBT-02/03/07/08/09 適用) の判定境界が Unit 単位で明確 / Construction Phase の Functional Design / Code Generation で PBT 実装責務が一意に確定 |
+| (b) | **Bolt 1 順序での並行検証可能性** | R9 (Bedrock 申請) 待ち中、Unit-3 (純粋関数 PBT 先行検証) と Unit-5 (天気 API キー申請 + クライアント単体実装) を **Unit-2 とは独立に並行実装可能**。Unit-2 に統合した粒度では「R9 承認まで全部待ち」となり Bolt 1 が空回り |
+| (c) | **Open Items per-Unit Loop での担当明示** | Open Item O-01 (迷惑リスク判定の具体閾値) は Unit-3 担当 / O-16 (METs ベース定量化) も Unit-3 主担当 / 等。Construction Phase の per-Unit Functional Design でクローズする際、Unit 粒度が小さい方が責務が明確 |
+| (d) | **責務境界の明確化** | 純粋関数 (Unit-3) / 外部 API クライアント (Unit-5) / オーケストレーション (Unit-2) という **3 つの異なる責務** を独立に表現できる。Unit-2 に統合すると「Dialogue Lambda が全部やる」という巨大 Unit になり、テスタビリティ・追跡可能性が低下 |
+
+#### (3) AI-DLC ルール「subdomain 相当」解釈との整合
+
+AI-DLC ルール (units-generation.md Overview): 「For microservices, each unit becomes an independently deployable service. For monoliths, the single unit represents the entire application with logical modules.」
+
+本プロジェクトは **microservices と monolith の中間**:
+- 物理的には 4 つの独立デプロイ可能 Service (Mobile / Dialogue Lambda / History & Title Lambda / Catalog Distribution + Infrastructure 横断)
+- 論理的には **subdomain 相当**として 7 つの Unit of Work (純粋関数 / 外部クライアント / 統合的責務 / 各々独立した Functional Design 対象)
+
+per-Unit Loop (Construction Phase の Functional Design / NFR Requirements / NFR Design / Infrastructure Design / Code Generation) を **subdomain 単位で回す** ことで、設計の追跡可能性と PBT の適用粒度が両立する。
+
+#### (4) コンポーネント 1:1 マッピングの優位性
+
+| 観点 | 1:1 マッピングの利点 |
+|---|---|
+| **追跡可能性** | C-N → Unit-N の 1:1 対応により、Application Design ステージから Construction Phase まで識別子が一貫 (例: C-03 = Unit-3 = Risk Calculator) |
+| **責務再分解の回避** | Application Design で確定したコンポーネント境界をそのまま継承 / Units Generation での再判定なし |
+| **per-Unit Loop の運用** | Functional Design / NFR Requirements / NFR Design / Infrastructure Design / Code Generation を **同一の単位** で 7 回繰り返す / 単位境界の混乱なし |
+| **外部ステークホルダーへの可読性** | 「7 コンポーネント → 7 Unit」のシンプルな対応関係 / 不要な抽象化レイヤーなし |
+
+> **結論**: Module (Unit-3 / Unit-5) を独立 Unit 化する判断は、AI-DLC ルール (subdomain 相当) と整合し、PBT 適用 / Bolt 1 並行実装 / Open Items per-Unit 担当 / 責務境界の 4 観点で明確な利益がある。物理境界 (Lambda バンドル) との矛盾もない。
 
 ---
 

@@ -134,7 +134,7 @@ External:
 
 ## 4. Bolt 1 デプロイ順序 (R8 / R9 への対応)
 
-予選通過後の最初の Bolt で着手する順序。**R8 (AWS アカウント準備) と R9 (Bedrock モデルアクセス申請) を最優先 / 申請待ち中も他 Unit を並行実装可能** にする分離戦略。
+Bolt 1 で着手する順序。**R8 (AWS アカウント準備) と R9 (Bedrock モデルアクセス申請) をクリティカルパス / 申請待ち中も他 Unit を並行実装可能** にする分離戦略。
 
 | 順序 | Unit | 着手条件 | 並行実装可否 |
 |---|---|---|---|
@@ -153,6 +153,52 @@ External:
 - **Unit-7 は Lambda 経由しないため R9 と完全独立** → AWS アカウント (R8) 取得後すぐに価値が出る
 - **Unit-1 は擬似データモード (DEBUG ビルド) で先行実装可能** → R9 申請承認待ち中も UI / 統合テストを進められる
 - 並行実装可能な Unit は 2/3/4/5/7 の **5 つ** / R9 申請待ちで詰まらない
+
+### 4.1 Bolt 1 順序の視覚化 (R8 / R9 クリティカルパス + 並行実装)
+
+```
+時間軸 →
+
+Day 0     Day 1                    Day 7-14                Day 14+
+─────────────────────────────────────────────────────────────────────
+[R8] AWS アカウント準備 (クリティカル / 数時間〜数日)
+  ▼
+  ├── Unit-6 Infrastructure (基本 IaC / R8 直後着手)
+  │
+  ├── [R9] Bedrock モデルアクセス申請 (Critical Path / 数日〜数週間)
+  │   (Claude Sonnet 4.6 + Claude Opus 4.7)
+  │       │
+  │       │ ▼ (R9 申請待ち中の並行実装ゾーン / 5 Unit)
+  │       │
+  │       ├── ✓ Unit-4 History & Title (DynamoDB + META#AFFIRMATIONS)
+  │       │   └ Bedrock 不要 / DDB 単独で完結
+  │       │
+  │       ├── ✓ Unit-7 Title Catalog Distribution (S3 + CloudFront)
+  │       │   └ Lambda 経由しない / R9 と完全独立
+  │       │
+  │       ├── ✓ Unit-5 External Client (天気 API)
+  │       │   └ 天気 API キー申請を並行 / R10 キャッシュ戦略
+  │       │
+  │       ├── ✓ Unit-3 Risk Calculator (純粋関数 / PBT)
+  │       │   └ 単体テスト + PBT-02/03/07/08/09 で先行検証
+  │       │
+  │       └── ✓ Unit-1 Mobile Client (擬似データ DEBUG ビルド)
+  │           └ HealthKit/EventKit/UNUserNotif の Adapter 実装
+  │             + UI / オンボーディング / カレンダー UI
+  │
+  ▼ (R9 承認後)
+  Unit-2 Dialogue API (Bedrock InvokeModel)
+       └ buildPrompt (PBT FR-05) + 動的トーンシフト + Direct Invoke
+       └ Unit-3 / Unit-5 を同 Lambda にバンドル
+
+凡例: ✓ = R9 申請待ち中も並行実装可能 (5 Unit)
+      ▼ = 順序依存 (前工程完了が必要)
+```
+
+**並行実装可能性のサマリ**:
+- R9 (Bedrock 申請) の承認待ちは数日〜数週間と想定 / その期間に **Unit-3/4/5/7 + Unit-1 (擬似データ DEBUG ビルド) の 5 Unit を並行実装可能**
+- Unit-7 は Lambda 経由しない (S3 + CloudFront 直配信) ため R9 と **完全独立**
+- Unit-2 (Bedrock 利用) のみ R9 のクリティカルパス上 / 但し依存先 (Unit-3 / Unit-5 のロジック実装 + Unit-4 の Direct Invoke API) が事前に揃うため、R9 承認後の統合は短時間で完了する想定
 
 ---
 

@@ -44,7 +44,7 @@
 | **Rollback Complexity** | **N/A (Greenfield)** | 既存システムへの影響無し / 撤退ルートは「**iOS DEBUG ビルドの擬似データモード**」(R2) として要件レベルで確保済み |
 | **Testing Complexity** | **Complex** | LLM プロンプト品質 (R4) + データプライバシー検証 (R3) + 倫理的トーン検証 (R11/R13) + PBT 対象 3 純粋関数 (FR-04/05/10) で複合的 |
 
-> **Risk Level High の取り扱い方針**: 書類審査段階では設計の正しさで対応 (Application Design / Units Generation の品質)。実装リスク (R8/R9) は予選通過後の最初の Bolt で集中対応。
+> **Risk Level High の取り扱い方針**: Inception フェーズでは設計の正しさで対応 (Application Design / Units Generation の品質)。実装リスク (R8/R9) は Bolt 1 で集中対応。
 
 ### 1.4 Hackathon-Specific Constraints
 
@@ -53,7 +53,7 @@
 | 書類審査締切 | 2026-05-10 | Inception フェーズ全体を **3 日以内** で確定 (本日 2026-05-07 起点) |
 | 書類審査対象 | Inception 成果物 + PRFAQ | Application Design / Units Generation / PRFAQ の品質に重点 |
 | 予選通過後の追加期間 | 1 ヶ月 | Construction Phase は概略のみで OK (実装は予選後) |
-| AWS 主催規約 | AWS サービスのみで構築 (NFR-DAT-03) | Technical Stack 固定 (Bedrock / Lambda / DynamoDB / API Gateway / CloudWatch) |
+| Build Constraint | AWS サービスのみで構築 (NFR-DAT-03) | Technical Stack 固定 (Bedrock / Lambda / DynamoDB / API Gateway / CloudWatch) |
 
 ---
 
@@ -177,7 +177,7 @@ OPERATIONS PHASE
 
 **実行根拠**:
 - 新規コンポーネント (Mobile Client / API Gateway / Lambda / Bedrock / DynamoDB / 外部 API クライアント) の境界・責務を定義する必要あり
-- LLM プロンプト設計 (ジャッジ・悪魔・動的トーンシフト) はドメインの中核であり、書類審査での「ユニーク性」評価に直結
+- LLM プロンプト設計 (ジャッジ・悪魔・動的トーンシフト) はドメインの中核であり、Differentiator (主要差別化要因) を客観的に説明する媒体
 - 機微データのフロー (R3 / NFR-DAT-02: ローカル保存基本) を視覚化することが Security Baseline 拡張への対応で必須
 - iOS HealthKit を仮前提とした擬似データ層への抽象化 (Q4 回答) を設計レベルで明示する必要あり
 
@@ -233,7 +233,7 @@ OPERATIONS PHASE
 
 ### 3.3 CONSTRUCTION PHASE (予選通過後 / 概略のみ)
 
-> **書類審査段階では概略のみ確定**。各ステージの詳細粒度は予選通過後の最初の Bolt で再評価する。
+> **Inception フェーズでは概略のみ確定**。各ステージの詳細粒度は Bolt 1 で再評価する。
 
 | ステージ | 状態 | 暫定根拠 (予選通過後に再評価) |
 |---|---|---|
@@ -250,7 +250,7 @@ OPERATIONS PHASE
 
 | ステージ | 状態 | 根拠 |
 |---|---|---|
-| Operations | [PLACEHOLDER] | AI-DLC 標準上の placeholder / 現状スコープ外 (ハッカソン本選後の運用は未定) |
+| Operations | [PLACEHOLDER] | AI-DLC 標準上の placeholder / 現状スコープ外 (本プロダクト本番運用は未定) |
 
 ---
 
@@ -261,7 +261,7 @@ User Stories ステージ (`user-stories.md` の「過剰/過小設計の検討�
 | # | 判断事項 | 現状の優先度 | 検討の方向性 | 決着場所 |
 |---|---|---|---|---|
 | **D-01** | US-2.4 (悪魔のトーンシフト) を MVP に含めるか / Should に格下げするか | **Must** | **Must 維持を推奨** (理由: 「データ駆動で人格が変化する LLM 活用」は本プロダクトの主要差別化要因 (`requirements.md` Differentiators) の中核 / R14 「Bolt で段階導入」で実装リスクは管理可能)。ただし Application Design でプロンプト設計の難度 (R4) を再評価し、難航する場合のみ Should 格下げを検討 | Application Design Section 1 |
-| **D-02** | US-5.5 (コンセプト明示オンボーディング) の文言は法的に十分か / 専門家レビューが必要か | **Must** | **書類審査段階では「専門家レビュー予定」として記載**。理由: 書類審査時点で法的正確性を完全担保する必要性は低い / R11 (倫理的リスク) 対策として「予選通過後の最初の Bolt で法務観点レビューを実施する」をリスク対応計画に追記する案 | Application Design Section 1 + Risk Register R11 更新 |
+| **D-02** | US-5.5 (コンセプト明示オンボーディング) の文言は法的に十分か / 専門家レビューが必要か | **Must** | **Inception フェーズでは「専門家レビュー予定」として記載**。理由: Inception フェーズ時点で法的正確性を完全担保する必要性は低い / R11 (倫理的リスク) 対策として「Bolt 1 で法務観点レビューを実施する」をリスク対応計画に追記する案 | Application Design Section 1 + Risk Register R11 更新 |
 | **D-03** | US-2.3 (キャラクター切替) を Must に昇格するか | **Should** | **Should 維持を推奨** (理由: コア体験 (ジャッジと悪魔の対話) は US-2.1 で成立しており、US-2.3 のキャラ切替は付加価値レイヤ / Must を増やすと R1 スコープ過大が悪化)。ただし Application Design でドメインモデルがキャラ追加に容易に拡張できる構造になっているか確認 | Application Design Section 1 |
 
 > **本 Workflow Planning ステージでは判断を確定しない**。理由: Application Design でコンポーネント境界・LLM プロンプト構造を見ながら判断する方が情報量が多く正確。「決着場所と暫定方針」を本ファイルに明示することで、後続ステージへの引き継ぎを明確にする。
@@ -284,7 +284,7 @@ User Stories ステージ (`user-stories.md` の「過剰/過小設計の検討�
 
 ### 5.2 Construction Phase (予選通過後の 1 ヶ月 / 概略)
 
-予選通過後の最初の Bolt で再評価。暫定的な配分:
+Bolt 1 で再評価。暫定的な配分:
 - Bolt 1 (Week 1): AWS アカウント・Bedrock モデルアクセス申請 (R8/R9 最優先) + プラットフォーム最終確定 (R5) + Per-Unit Functional Design 着手
 - Bolt 2-3 (Week 2-3): Per-Unit NFR/Infra/Code 反復 / プロンプトテスト (R4/R14)
 - Bolt 4 (Week 4): Build and Test / 最終デモ準備
@@ -311,7 +311,7 @@ User Stories ステージ (`user-stories.md` の「過剰/過小設計の検討�
 
 ### 6.2 Construction Phase 完了 (予選通過後 / 暫定)
 
-**Primary Goal**: ハッカソン本選デモを成功させる
+**Primary Goal**: 本選デモを成功させる
 
 **Key Deliverables**:
 - 動作する MVP (M ライン全 17 ストーリー実装)

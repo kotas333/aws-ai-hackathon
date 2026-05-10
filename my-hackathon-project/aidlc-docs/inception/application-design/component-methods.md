@@ -168,6 +168,8 @@ interface NotificationScheduler {
 function showOnboarding(): Promise<{ accepted: boolean }>;
 
 // US-1.1, US-1.2, US-1.3, US-1.6 (Mobile 側のデータ取得 / FR-12 でカレンダー追加)
+// スキャンボタン押下時に呼び出し / 各 Adapter から並列取得 (健康 + 位置 + カレンダー一括取得)
+// (US-5.2 第 1 段階のフロー起点)
 function collectInputs(): Promise<{
   health: HealthSummary | null;
   location: { latitude: number; longitude: number } | null;
@@ -175,6 +177,8 @@ function collectInputs(): Promise<{
 }>;
 
 // US-2.1 (Dialogue API 呼び出し)
+// スキャンボタン押下後の collectInputs 完了 → requestDialogue → 対話表示 + 選択ボタン表示
+// (US-5.2 第 1 段階のスキャンフロー後半 → 第 2 段階への遷移)
 function requestDialogue(input: {
   deviceUUID: DeviceUUID;
   health: HealthSummary | null;

@@ -28,12 +28,17 @@
 ## S-01: Dialogue Service (`POST /dialogue`)
 
 ### ユーザーシナリオ
-US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験のオーケストレーション**
+US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験のオーケストレーション**。**ユーザーのスキャンボタン押下時 (US-5.2 第 1 段階) に Mobile (C-01) から呼ばれる** (アプリ起動ごとの自動呼び出しは行わず、ユーザー操作起点に限定 / R10 料金予算と整合)。
 
 ### オーケストレーションフロー
 
 ```
+[User Action: スキャンボタン押下 (US-5.2 第 1 段階)]
+   |
+   v
 [Mobile (C-01)]
+   |  collectInputs() で並列取得 (HealthKit / EventKit / CoreLocation)
+   |  ローディング演出開始 (FR-11 / NFR-USA-03 / US-5.6 スキャン中演出)
    |  POST /dialogue
    |  { deviceUUID, health, location, calendar, characterSetId? }
    |                          ^^^^^^^^ FR-12 (FR-12 / US-1.6)
@@ -79,6 +84,9 @@ US-2.1 + US-2.2 + US-2.4 + US-1.5 を統合して動作する **コア体験の�
    v
 [Mobile (C-01)]
    <- DialogueResponse { dialogue, riskLevel }
+   |
+   v
+[Mobile: 対話表示 + 「入る」「サボる」選択ボタン (US-5.2 第 2 段階)]
 ```
 
 ### 設計上の重要ポイント

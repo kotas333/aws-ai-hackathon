@@ -14,6 +14,18 @@
 
 ---
 
+> ## TL;DR (3 分で読む)
+>
+> 7 コンポーネント / AWS Serverless 構成のアーキテクチャ設計。
+>
+> 1. **コンポーネント分解**: C-01 Mobile (iOS) + C-02 Dialogue Lambda + C-03 Risk Calculator + C-04 History & Title + C-05 External + C-06 Infrastructure + C-07 Catalog (S3 + CloudFront)。
+> 2. **オーケストレーション**: スキャンボタン押下 → 並列取得 → Dialogue Lambda → Bedrock Sonnet 4.6 → 対話表示 + 選択ボタン。
+> 3. **設計の優先順位**: 機微データ境界保護 > 応答速度 > AWS マネージドサービスでの構築 > MVP 17 件の実装可能性 > R8/R9 対応容易性 > R1 スコープ管理。
+>
+> 詳細は Section 4 (コンポーネント) / Section 6 (S-01 オーケストレーション) / Section 9 (LLM プロンプト) / Section 10 (機微データフロー) を参照。
+
+---
+
 > **Section 1 (Pending Decisions Resolution) について**: かつて本セクションには User Stories ステージから持ち越された 3 件の判断 (D-01: US-2.4 / D-02: US-5.5 / D-03: US-2.3) を決着させる章が存在したが、AI-DLC のステージ責務分担に従い、これらの判断は本来の上流ステージ (User Stories / Requirements) で確定された記述に統合した。このため Section 1 は欠番。Section 番号 (Section 1.5 / 1.6 / Section 2 以降) は読み手の参照容易性のため不変としている。
 >
 > - US-2.4 (悪魔のトーンシフト / Must) → `user-stories.md` US-2.4 を参照
@@ -86,18 +98,18 @@
 
 | 様式 | 採用理由 |
 |---|---|
-| **AWS Serverless** (Lambda + API Gateway + DynamoDB) | NFR-DAT-03 「AWS サービスのみ」/ R8・R9 への対応が容易 / ハッカソン速度 |
+| **AWS Serverless** (Lambda + API Gateway + DynamoDB) | NFR-DAT-03 「AWS サービスのみ」/ R8・R9 への対応が容易 / Bolt 1 の実装速度 |
 | **Event-Driven** (リクエスト駆動 / 状態を持たない LLM 呼び出し) | Mobile からのリクエスト単位で完結する単純なフロー |
 | **Adapter Pattern** (HealthKit / EventKit / 擬似データモード) | Q4 回答 (iOS 確定 + DEBUG ビルド擬似データモード) を Mobile 内で抽象化 |
 | **Domain-Driven の軽量適用** (ジャッジ・悪魔 / 動的トーンシフト / 称号) | Mob Elaboration の中核ドメインを言語化 / US-2.3 拡張容易性を担保 |
 
 ### 2.2 設計の優先順位 (明示的制約に基づく順位付け)
 
-各設計判断は以下の優先順位で評価する。優先順位は明示的制約 (NFR / Risk Register / 主催規約) に基づき、上位ほど厳格に守る:
+各設計判断は以下の優先順位で評価する。優先順位は明示的制約 (NFR / Risk Register / Build Constraint) に基づき、上位ほど厳格に守る:
 
 1. **機微情報のローカル保護** (NFR-DAT-02 / R3 / SECURITY-13) — ヘルスケア生データ + カレンダー生データ (タイトル / 場所 / 参加者) は端末ローカル限定。AWS には集計値 (HealthSummary / CalendarSummary) のみ送信。Section 10 機微データフローで端末ローカル境界を視覚化して担保
 2. **応答速度の確保** (NFR-USA-02 / 数秒以内) — Direct Invoke (Dialogue Lambda → History Lambda) / 並列化 (`getRecentSkipPattern()` + `getLastBathTime()`) / CloudFront edge cache (C-07 catalog 配信) / DDB 由来 Affirmation (LLM 再呼び出し回避) を Section 6 + `component-dependency.md` で担保
-3. **AWS マネージドサービスでの構築** (NFR-DAT-03 / 主催規約準拠) — AWS Serverless アーキテクチャを採用し、Bedrock / Lambda / DynamoDB / API Gateway / S3 / CloudFront のマネージドサービスで実現
+3. **AWS マネージドサービスでの構築** (NFR-DAT-03) — AWS Serverless アーキテクチャを採用し、Bedrock / Lambda / DynamoDB / API Gateway / S3 / CloudFront のマネージドサービスで実現
 4. **MVP 17 件 (Must) の実装可能性** — Section 4 コンポーネント分解で 7 コンポーネント並行実装可能
 5. **R8 (AWS アカウント準備遅延) / R9 (Bedrock モデルアクセス申請遅延) への対応容易性** — `component-dependency.md` Section 6 (デプロイ単位) でコンポーネント独立性を確保。R9 申請待ち中も C-04 / C-05 / C-03 / C-07 を先行実装可能 (C-07 は Lambda 経由しないため R9 と完全独立)
 6. **R1 (スコープ過大) のリスク管理** — Should ストーリー (US-1.4 / US-2.3 / US-3.3 / US-5.7) を Must 増の代わりに保留することで、実装スコープを管理可能範囲に維持
@@ -223,17 +235,32 @@ External:
 ### S-01 のオーケストレーション (コア体験)
 
 ```
-Mobile -> POST /dialogue
-  -> API Gateway (認可 + スロットリング)
-  -> Dialogue Lambda
-       (1) External で天気取得 (location ありなら)
-       (2) Risk Calculator で迷惑リスク判定 (PBT FR-04)
-       (3) History Lambda Direct Invoke で連続サボりサマリ取得 (FR-07)
-       (4) buildPrompt() で System+User Prompt 構築 (PBT FR-05)
-            └ 動的トーンシフト適用 (US-2.4 Must)
-       (5) Bedrock Claude 呼び出し
-       (6) レスポンス整形 (悪魔最後 / 責めない)
-  -> Mobile
+[User Action: スキャンボタン押下 (US-5.2 第 1 段階)]
+   |
+   v
+[Mobile (C-01)]
+   (1) HealthKit 取得 (FR-01, 02 / 端末ローカル限定)
+   (2) EventKit 取得 (FR-12 / 端末ローカル限定)
+   (3) CoreLocation 取得 (FR-03 一部)
+   (4) ローディング演出開始 (FR-11 / NFR-USA-03 / US-5.6 スキャン中演出)
+   v
+POST /dialogue
+   |
+   v
+API Gateway (認可 + スロットリング)
+   |
+   v
+Dialogue Lambda
+   (1) External で天気取得 (location ありなら)
+   (2) Risk Calculator で迷惑リスク判定 (PBT FR-04 / Unit-3)
+   (3) History Lambda Direct Invoke で連続サボりサマリ取得 (FR-07)
+   (4) buildPrompt() で System+User Prompt 構築 (PBT FR-05 / Unit-2)
+        └ 動的トーンシフト適用 (US-2.4 Must)
+   (5) Bedrock Claude 呼び出し
+   (6) レスポンス整形 (悪魔最後 / 責めない)
+   |
+   v
+[Mobile: 対話表示 + 「入る」「サボる」選択ボタン (US-5.2 第 2 段階)]
 ```
 
 ### S-02 のオーケストレーション (AWS-shift 反映)
@@ -350,6 +377,8 @@ P2 が誤って利用した場合に害を与えない設計を以下で担保:
 ---
 
 ## Section 9. LLM Prompt Architecture (中核ドメイン)
+
+> **トリガー**: LLM 呼び出しはユーザーのスキャンボタン押下 (US-5.2 第 1 段階) を起点とする。アプリ起動ごとの自動呼び出しは行わず、ユーザー操作起点に限定することで R10 (LLM 料金予算超過) と整合する。
 
 ### 9.1 プロンプト構造の概念
 
@@ -592,7 +621,7 @@ P2 が誤って利用した場合に害を与えない設計を以下で担保:
 Adapter は以下 2 つの責務を持つ:
 
 1. **テスタビリティ**: ユニットテスト時のモック注入
-2. **デモ用擬似データモード**: HealthKit (および EventKit / CoreLocation) が予選実装で難航した場合、**DEBUG ビルドで擬似データを返す `PseudoXXXAdapter` に差し替えてデモ実施可能** (撤退ではなく「デモ用モード」)
+2. **デモ用擬似データモード**: HealthKit (および EventKit / CoreLocation) が Bolt 1 の実装で難航した場合、**DEBUG ビルドで擬似データを返す `PseudoXXXAdapter` に差し替えてデモ実施可能** (撤退ではなく「デモ用モード」)
 
 ```
                 +-----------------------------+
@@ -635,6 +664,7 @@ Adapter は以下 2 つの責務を持つ:
 |---|---|
 | **C-01 内のみ** | Application Core (UI / ViewModel) は不変 / Adapter 実装のみ差し替え (DEBUG ビルド) |
 | **C-02〜C-07 不変** | API 契約・サーバーレス構成・DynamoDB スキーマすべて不変 |
+| **スキャンフロー不変** | スキャン押下フローは Production と同じ動作 (PseudoXXXAdapter が即座に擬似データを返す / ローディング演出は維持 / US-5.2 第 1 段階・第 2 段階の遷移は不変) |
 | **デプロイ形態** | iOS の DEBUG ビルド (TestFlight 内輪配信 or Xcode 直配布)。**Web 版は作らない** |
 | **PRFAQ への記載** | Internal FAQ で「**撤退ではなくデモ用モード**: 実装難航時に DEBUG ビルドで擬似データに差し替えてデモ実施可能」と記載 |
 
@@ -645,16 +675,37 @@ Adapter は以下 2 つの責務を持つ:
 - **テスト容易性**: 同じ Adapter パターンで Mock 注入が可能 → ユニットテスト品質向上
 - **PBT 対象 3 関数 (FR-04/05/10) はプラットフォーム非依存**: 純粋関数として変更なし
 
+### 11.5 スキャン押下時の Adapter 呼び出し順序 (US-5.2 第 1 段階)
+
+```
+onScanButtonTap()                              ← User Action (US-5.2 第 1 段階)
+   |
+   +-- 並列取得 (Production / Pseudo / Mock いずれも同じインタフェース):
+   |     HealthDataAdapter.fetchTodaySummary()         (FR-01, 02)
+   |     LocationDataAdapter.fetchCurrentLocation()    (FR-03)
+   |     CalendarDataAdapter.fetchTomorrowSummary()    (FR-12)
+   |
+   +-- ローディング演出開始 (FR-11 / NFR-USA-03 / US-5.6 スキャン中演出)
+   |
+   v
+DialogueAPIClient.requestDialogue(HealthSummary, LocationContext, CalendarSummary)
+   |
+   v
+[対話表示 + 「入る」「サボる」選択ボタン]                ← US-5.2 第 2 段階
+```
+
+> **擬似データモードでも同一フロー**: PseudoXXXAdapter は即座に擬似データを返すが、UI 層から見えるフロー (スキャン押下 → ローディング演出 → 対話表示 + 選択ボタン) は不変 (Section 11.3 と整合)。
+
 ---
 
-## Section 12. Q5 Implementation Plan (AWS 想定環境 + 予選通過後の最優先タスク)
+## Section 12. Q5 Implementation Plan (AWS 想定環境 + Bolt 1 のクリティカルパス)
 
-### 12.1 書類審査段階での記載 (想定環境)
+### 12.1 Inception フェーズでの記載 (Implementation Context / 想定環境)
 
-| 項目 | 想定環境 | 予選通過後のアクション |
+| 項目 | 想定環境 | Bolt 1 でのアクション |
 |---|---|---|
-| AWS アカウント | 予選通過後の最初の Bolt で準備 | Bolt 1 最優先 / R8 |
-| Bedrock モデルアクセス (Claude Sonnet 4.6 第一候補 + Claude Opus 4.7 拡張オプション) | ap-northeast-1 で予選通過後の Bolt で申請 | Bolt 1 最優先 / R9 |
+| AWS アカウント | Bolt 1 で準備 | Bolt 1 のクリティカルパス / R8 |
+| Bedrock モデルアクセス (Claude Sonnet 4.6 第一候補 + Claude Opus 4.7 拡張オプション) | ap-northeast-1 で Bolt 1 で申請 | Bolt 1 のクリティカルパス / R9 |
 | リージョン | ap-northeast-1 (Tokyo) 確定 (NFR-DAT-05) | — |
 | IAM 構成 | 最小権限ロール (Dialogue Lambda / History Lambda 別) | Bolt 1 で IaC として実装 |
 | シークレット | 天気 API キーを Secrets Manager で管理 | Bolt 1 で天気 API も申請 |
@@ -672,7 +723,7 @@ Adapter は以下 2 つの責務を持つ:
 
 ### 12.3 PRFAQ への記載
 
-PRFAQ ステージで上記を「Internal FAQ: 予選通過後の最優先タスク」として明記する (R11 対策方針 (c) 法務観点レビューと並んで Bolt 1 最優先タスク群)。
+上記を **Bolt 1 のクリティカルパス群** として扱う (R11 対策方針 (c) 法務観点レビューと並んで)。
 
 ---
 
@@ -756,8 +807,10 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 - EventKit アクセス時のキャッシュ戦略 (US-1.6 と US-5.7 の重複取得回避)
 - 擬似データモード (DEBUG ビルド) の擬似値分布設計
 - **`movementScore` の METs ベース定量化** (公式出典: 厚労省「身体活動・運動ガイド2023」+ 国立健康・栄養研究所「メッツ(METs)表」/ 詳細式は `requirements.md` NFR 健康配慮ポリシー脚注参照 / 体重 `weightKg` の HealthSummary 取り込み是非も含めて Functional Design で決着)
+- **スキャンボタンの最終命名** (O-17 / 候補: 「綺麗度スキャン」「ジャッジを呼ぶ」「サボり判定」「綺麗度チェック」等 / Phase M で新規追加)
+- **スキャンボタン UX の詳細仕様** (O-18 / 演出時間の最小 3 秒の根拠 + NFR-USA-02 数秒以内との整合 / 演出内容の組み合わせ / 同日キャッシュ戦略 / エラー時の再スキャン UX / Phase M で新規追加)
 
-> 詳細な担当 Unit 一覧 (O-01〜O-16 の Unit 帰属確定 / O-08 Closed) は Units Generation ステージ成果物 **`unit-of-work.md` 末尾の「Open Items 担当一覧」セクション** を参照してください。Construction Phase の per-Unit Functional Design でクローズしていく対象です。
+> 詳細な担当 Unit 一覧 (O-01〜O-18 の Unit 帰属確定 / O-08 Closed) は Units Generation ステージ成果物 **`unit-of-work.md` 末尾の「Open Items 担当一覧」セクション** を参照してください。Construction Phase の per-Unit Functional Design でクローズしていく対象です。
 
 ### 16.1 本ステージで Closed にした項目 (Section 16 から本文に昇格)
 
@@ -776,7 +829,7 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
    - Section 9 (LLM プロンプト構造) — AI 活用の中核ドメイン
    - Section 10 (機微データフロー) — プライバシー設計 (NFR-DAT-02 / R3 / SECURITY-13 への対応)
    - Section 11 (Q4 Implementation Plan) — iOS / Swift / SwiftUI 採用と擬似データモードの設計
-   - Section 12 (Q5 Implementation Plan) — AWS 想定環境と予選通過後のタスク順序
+   - Section 12 (Q5 Implementation Plan) — AWS 想定環境と Bolt 1 のタスク順序
    - Section 1.5 (Naming Decision) — ジャッジ命名の経緯
    - Section 1.6 (Design Decisions / DD-01〜DD-03) — Application Design ステージで確定した設計判断
    - Section 18 (Visual Asset Plan) — キャラデザの設計レベル要件
@@ -785,7 +838,7 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 
 ## Section 18. Visual Asset Plan (キャラデザの設計レベル要件 / Application Design Revision 2 で新規追加)
 
-> **本セクションの粒度**: 印象が伝わる粒度のみを定義する。詳細な絵柄やデザイン案、イラスト発注先、ライセンスは **PRFAQ ステージまたは書類審査提出パッケージ** で決定する。本ステージでは「どのコンポーネントが何を持つか」の責務分担と、各キャラの設計要件のみを明文化する。
+> **本セクションの粒度**: 印象が伝わる粒度のみを定義する。詳細な絵柄やデザイン案、イラスト発注先、ライセンスは **PRFAQ ステージまたは Construction Phase の詳細設計** で決定する。本ステージでは「どのコンポーネントが何を持つか」の責務分担と、各キャラの設計要件のみを明文化する。
 
 ### 18.1 キャラデザの責務分担
 
@@ -819,8 +872,18 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 | **通常時** | データ提示中の中立表情 | サボり推奨ニヤけ顔 / ソファに沈む |
 | **トーンシフト時 (US-2.4 Must)** | 不変 (常にデータ駆動 / 中立) | 心配そうな苦笑 / 諭し顔 |
 | **選択後肯定モード (US-3.1 / S-02)** | 「結果を承認する」中立的なうなずき | 全肯定の親指立て / 寄り添う表情 |
+| **スキャン中演出 (US-5.2 第 1 段階 / FR-11)** | 診断中の手元動作 (タブレット操作 / データ参照) | 反論を準備中の表情 / ソファに深く沈む |
 
-> 上記 3 状態は最小限のバリエーション。アニメーション (NFR-USA-03 ダラけ感の演出) は Construction Phase で詳細化。
+> 上記 4 状態 (通常 / トーンシフト / 選択後 / **スキャン中**) は最小限のバリエーション。アニメーション (NFR-USA-03 ダラけ感の演出) は Construction Phase で詳細化。
+
+### 18.4.1 スキャン中演出 (US-5.2 第 1 段階 / FR-11)
+
+スキャン押下時は以下のような演出を組み合わせて表示する (Functional Design / O-18 で詳細化):
+
+- **キャラ演出**: ジャッジが診断中 (タブレット操作 / データ参照) / 悪魔が反論を準備中 / キャラがソファに深く沈む
+- **テキストロード**: 「ヘルスケアデータを取得中…」「天気を確認中…」「ジャッジが集計しています…」「悪魔が反論を準備中…」等のステップ表示
+- **プログレス**: プログレスバーがぬるっと進行 (ease-in-out)
+- **演出時間**: **最小 3 秒程度** の演出時間 (FR-11 ダラけ感の余白確保 / NFR-USA-02 数秒以内との整合 / O-18 で確定)
 
 ### 18.5 アセット管理
 
@@ -834,7 +897,7 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 
 ### 18.6 PRFAQ への引き継ぎ
 
-以下を **PRFAQ ステージまたは書類審査提出パッケージ** で決定 (本ステージのスコープ外):
+以下を **PRFAQ ステージまたは Construction Phase の詳細設計** で決定 (本ステージのスコープ外):
 
 - 具体的なデザイン案 (絵コンテ / モックアップ)
 - イラスト発注先 (社内デザイナー / 外注 / 生成 AI 等)
@@ -843,4 +906,4 @@ Application Design ステージ完了時点で、以下の領域は次ステー�
 - 動的トーンシフト時の遷移演出の詳細
 - ホーム画面の翌日予定ミニ表示 (US-5.7 / FR-13) のレイアウト案
 
-> 書類審査提出時には **本セクションを根拠にデザインモックアップを添付** する想定。
+> 外部ステークホルダーレビュー時には **本セクションを根拠にデザインモックアップを添付** する想定。

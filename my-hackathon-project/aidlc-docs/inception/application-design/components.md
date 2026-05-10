@@ -8,6 +8,20 @@
 > - `aidlc-docs/inception/plans/execution-plan.md` Section 3.1
 > **関連**: `component-methods.md` (メソッドシグネチャ) / `services.md` (サービス層) / `component-dependency.md` (依存関係)
 
+---
+
+> ## TL;DR (3 分で読む)
+>
+> 7 コンポーネント (C-01〜C-07) の責務 + I/O 定義。
+>
+> 1. **C-01 Mobile (iOS)**: 全 21 ストーリーのうち 12 を担当 (UI 集中型)。スキャンボタン押下を起点とするフロー全体を担当 (US-5.2 第 1 段階 → 第 2 段階 / Phase M で確立)。
+> 2. **C-02 Dialogue Lambda**: コア体験のオーケストレーション + Bedrock 呼び出し (PBT FR-05 buildPrompt / Unit-2)。
+> 3. **C-03〜C-07**: Risk Calculator (PBT FR-04 / Unit-3) / History & Title (PBT FR-10 / Unit-4) / External (天気 API) / Infrastructure (CDK / IaC) / Catalog (S3 + CloudFront 静的配信)。
+>
+> 詳細は各コンポーネントの責務 / 配置 / 依存関係を参照。
+
+---
+
 ## 命名規則
 
 - コンポーネント ID: `C-NN` (NN: 二桁ゼロ埋め)
@@ -38,34 +52,50 @@
 
 ### 責務 (What)
 
+> **フロー全体**: アプリ起動 → ホーム画面 → **スキャンボタン押下 (US-5.2 第 1 段階)** → 取得・判定・対話 → **対話表示 + 選択ボタン (US-5.2 第 2 段階)** → 履歴保存 — の全体を C-01 が担当する。スキャンボタン押下を起点として、以下 1〜11 の責務がフロー上に配置される。
+
+0. **スキャンボタン UI / フロー起点処理** — US-5.2 第 1 段階 (FR-11 / NFR-USA-01)
+   - ホーム画面中央に **スキャンボタン (仮称 / O-17)** を配置 (片手操作整合)
+   - 押下時に並列起動: `HealthDataAdapter.fetchTodaySummary()` / `LocationDataAdapter.fetchCurrentLocation()` / `CalendarDataAdapter.fetchTomorrowSummary()`
+   - **ローディング演出開始** (FR-11 / NFR-USA-03 / US-5.6 スキャン中演出 / 最小 3 秒程度 / O-18 で詳細化)
+   - 並列取得完了後 `DialogueAPIClient.requestDialogue(...)` を呼び出し
+   - レスポンス受領後に **対話表示 + 選択ボタン (US-5.2 第 2 段階)** へ遷移
+   - 同日中の再スキャン: ユーザー手動で再実行可能 (キャッシュ戦略は O-18 / Functional Design)
+
 1. **オンボーディング** — US-5.1, US-5.5
    - 初回起動時のキャラクター紹介
    - **コンセプト明示** (人をダメにするおふざけアプリ / 真剣な健康相談には使わない / R11 対策方針 (a) / requirements.md 参照)
    - 同意ボタン必須 (US-5.5 AC)
+   - **オンボーディング完了後はホーム画面 (スキャンボタン) へ遷移**
 
 2. **ヘルスケアデータ取得** — US-1.1, US-1.2 (FR-01, FR-02)
    - HealthKit から 6 項目取得 (歩数 / アクティブエネルギー / 運動時間 / 心拍数 / 睡眠時間 / 立ち上がり時間)
+   - **トリガー: スキャンボタン押下時 (US-5.2 第 1 段階のフロー内)**
    - 失敗時のフォールバック (ヘルスケアなしで対話生成可)
    - **HealthKit ラッパー (HealthDataAdapter)** で抽象化 → 擬似データ層と差し替え可能 (Q4 確定 / Section 11 参照)
 
 3. **位置情報取得** — US-1.3 (FR-03)
+   - **トリガー: スキャンボタン押下時 (US-5.2 第 1 段階のフロー内)**
    - 取得時のみ使用、永続保存しない (NFR-DAT-02)
    - 失敗時のフォールバック
 
 3.5. **カレンダーデータ取得** — US-1.6 (FR-12) / **FR-12**
+   - **トリガー: スキャンボタン押下時 (US-5.2 第 1 段階のフロー内)** (US-5.7 ホーム画面ミニ表示は別途キャッシュ戦略 / O-14)
    - iOS EventKit から翌日の予定サマリを取得 (`CalendarSummary { isHoliday, earliestEventTime, eventCount, asOf }`)
    - 機微情報 (タイトル / 場所 / 参加者) は **端末ローカル限定** / AWS には集計値のみ送信
    - 失敗時のフォールバック: 全フィールド null で対話生成継続
    - **CalendarDataAdapter** で抽象化 → DEBUG ビルドで PseudoCalendarAdapter に差し替え可能 (Section 11 参照)
 
 4. **Dialogue API 呼び出し** — US-2.1 (FR-05, FR-06)
+   - **トリガー: スキャン押下後の `collectInputs()` 完了直後 (US-5.2 第 1 段階)**
    - ヘルスケア要約 (生データではなく統計値) + 環境データ + 端末 UUID を `POST /dialogue` に送信
    - 応答を受け取り、ジャッジと悪魔のメッセージを表示 (US-2.1 AC: 識別可能形式 + **悪魔最後** + 責めない表現)
 
-5. **対話表示** — US-2.1, US-2.2 (FR-06)
+5. **対話表示 + 選択ボタン (US-5.2 第 2 段階)** — US-2.1, US-2.2 (FR-06)
    - 4〜6 ターンの対話表示
    - ストリーミング表示も可
    - エラー時のフォールバック表示「ちょっと考え事してます…」
+   - 対話表示の下部に「入る」「サボる」選択ボタンを表示
 
 6. **選択 (入る/サボる) 送信** — US-3.1 (FR-08)
    - `POST /selections` に送信
@@ -96,8 +126,9 @@
    - 許可状態表示 / バージョン情報 / コンセプト再表示 (US-5.5 から再表示)
    - キャラクター切替 UI (US-2.3 Should: ドメインモデル拡張点として用意)
 
-10. **ダラけ感のある UI 演出** — US-5.6 (FR-11 / NFR-USA-03)
+10. **ダラけ感のある UI 演出 / スキャン中演出** — US-5.6 (FR-11 / NFR-USA-03)
     - キャラがソファに沈む / ぬるっと動く / ゆるいフォント等のうち最低 3 つ
+    - **スキャン中演出 (US-5.2 第 1 段階)**: ジャッジが診断中 / 悪魔が反論を準備中 / プログレスバーがぬるっと進む / キャラがソファに深く沈む等の組み合わせ (詳細は O-18 / Functional Design)
 
 11. **翌日予定のホーム画面ミニ表示** — US-5.7 (FR-13) / **FR-12**
     - ホーム画面の片隅に翌日予定サマリ (最早開始時刻 / イベント数) を表示
@@ -133,7 +164,7 @@
 ### 配置と前提
 - **AWS サービス**: API Gateway + Lambda
 - **リージョン**: ap-northeast-1 (Tokyo / NFR-DAT-05)
-- **モデル**: Amazon Bedrock / **Claude Sonnet 4.6** (第一候補) / **Claude Opus 4.7** (高品質オプション / 拡張可能) (予選通過後の Bolt でモデルアクセス申請 / R9)
+- **モデル**: Amazon Bedrock / **Claude Sonnet 4.6** (第一候補) / **Claude Opus 4.7** (高品質オプション / 拡張可能) (Bolt 1 でモデルアクセス申請 / R9)
 
 ### 責務 (What)
 
@@ -254,7 +285,7 @@
 
 ### 配置と前提
 - **AWS サービス**: Lambda 内のクライアントライブラリ (C-02 にバンドル)
-- **外部 API**: 無料枠のある天気 API (OpenWeatherMap 等) — 予選通過後の Bolt で確定
+- **外部 API**: 無料枠のある天気 API (OpenWeatherMap 等) — Bolt 1 で確定
 
 ### 責務 (What)
 
@@ -310,7 +341,7 @@
 ## C-06: Infrastructure
 
 ### 配置と前提
-- **AWS サービス**: CloudFormation または CDK (NFR-DAT-03 / 主催規約準拠)
+- **AWS サービス**: CloudFormation または CDK (NFR-DAT-03)
 - **主管対象**: API Gateway / Lambda / DynamoDB / IAM / CloudWatch / Secrets Manager (天気 API キー)
 
 ### 責務 (What)
@@ -331,7 +362,7 @@
    - 天気 API キーは Secrets Manager / Lambda 環境変数経由で取得
    - Bedrock はモデルアクセスを IAM で制御 (キー不要)
 
-4. **デプロイパイプライン** (予選通過後の Bolt で構築 / 概略)
+4. **デプロイパイプライン** (Bolt 1 で構築 / 概略)
    - CDK Synth → CloudFormation Deploy
    - Bolt 1 で AWS アカウント / Bedrock モデルアクセス申請 (R8 / R9 / 最優先タスク)
 
@@ -381,7 +412,7 @@
 | US-3.3 (S / Revision 2 / FR-14) | C-01 (NotificationScheduler) + C-04 (markAchievement / S-06) |
 | US-4.1, US-4.2 | C-04 (動的判定) + C-07 (静的メタ配信 / S-04 AWS-shift) + C-01 (結合表示) |
 | US-5.1, US-5.2, US-5.3 | C-01 |
-| US-5.5 | C-01 (オンボーディング画面) — R11 対策方針 (a)(c): コンセプト明示 + 予選通過後 Bolt で法務観点レビュー |
+| US-5.5 | C-01 (オンボーディング画面) — R11 対策方針 (a)(c): コンセプト明示 + Bolt 1 で法務観点レビュー |
 | US-5.6 | C-01 |
 | US-5.7 (S / Revision 2 / FR-12) | C-01 (`getTomorrowMiniSummary()` + iOS 標準カレンダーへの遷移) |
 

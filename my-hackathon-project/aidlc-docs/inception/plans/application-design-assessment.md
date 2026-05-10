@@ -40,7 +40,7 @@ Application Design ステージでも以下の理由で **同じ方法論を継�
 | **Component Methods** (メソッド契約・I/O) | FR-01〜11 と全 18 ストーリーの AC で I/O が AC 単位で定義済み。本ステージは AC をメソッドシグネチャに翻訳する作業 |
 | **Service Layer Design** (オーケストレーション) | `requirements.md` Technical Context で AWS サーバーレス構成が確定済み (API Gateway + Lambda)。サービス層は API Gateway がオーケストレーション、Lambda が個別ユースケースを担当する標準パターンで自明 |
 | **Component Dependencies** (通信パターン・結合) | `requirements.md` NFR-DAT-02 で「ヘルスケア生データ = ローカル限定 / サボり履歴 = AWS」の境界が確定済み。本ステージはこの境界を依存関係マップに翻訳する作業 |
-| **Design Patterns** (アーキテクチャ様式) | AWS 主催規約 (NFR-DAT-03) と Bedrock + Lambda + DynamoDB の固定スタックで、サーバーレス + イベント駆動 + Adapter パターン (HealthKit/擬似データ切替) という様式が自明 |
+| **Design Patterns** (アーキテクチャ様式) | Build Constraint (NFR-DAT-03 / AWS サービスのみ) と Bedrock + Lambda + DynamoDB の固定スタックで、サーバーレス + イベント駆動 + Adapter パターン (HealthKit/擬似データ切替) という様式が自明 |
 
 ### ユーザーの優先事項 5 件で代替
 
@@ -73,14 +73,14 @@ Application Design ステージでも以下の理由で **同じ方法論を継�
 
 | 様式 | 選択理由 |
 |---|---|
-| **Serverless** (Lambda + API Gateway + DynamoDB) | NFR-DAT-03 「AWS サービスのみ」 / R8 R9 の予選通過後最優先タスク (アカウント・モデルアクセス) と整合 / 開発期間制約 (1 ヶ月) 内での実装可能性を高める |
+| **Serverless** (Lambda + API Gateway + DynamoDB) | NFR-DAT-03 「AWS サービスのみ」 / R8 R9 の Bolt 1 クリティカルパス (アカウント・モデルアクセス) と整合 / 開発期間制約 (約 1 ヶ月) 内での実装可能性を高める |
 | **Event-Driven** (対話生成 / 選択保存) | Mobile からのリクエストを Lambda が個別に処理する単純なフロー / 状態を持たない LLM 呼び出しに最適 |
 | **Adapter Pattern** (HealthKit / EventKit / 擬似データモード) | Q4 (iOS 確定 + DEBUG ビルド擬似データモード) を Mobile 内で抽象化 / R2 (ヘルスケア API 連携の実装難易度) への対応 |
 | **Domain-Driven の軽量適用** | Mob Elaboration の二人キャラクター (ジャッジ・悪魔) と動的トーンシフト (US-2.4) を中核ドメインとして明示 / US-2.3 (Should) 維持の根拠 (キャラ拡張容易性) を担保 |
 
 ### 設計の優先順位 (明示的制約に基づく順位付け)
 
-詳細は `application-design.md` Section 2.2 を参照。明示的制約 (NFR / Risk Register / 主催規約) に基づく順位は以下:
+詳細は `application-design.md` Section 2.2 を参照。明示的制約 (NFR / Risk Register / Build Constraint) に基づく順位は以下:
 
 1. **機微情報のローカル保護** (NFR-DAT-02 / R3 / SECURITY-13)
 2. **応答速度の確保** (NFR-USA-02)
